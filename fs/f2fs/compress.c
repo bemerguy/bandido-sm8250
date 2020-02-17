@@ -991,7 +991,8 @@ retry_write:
 			} else if (ret == -EAGAIN) {
 				ret = 0;
 				cond_resched();
-				congestion_wait(BLK_RW_ASYNC, HZ/200);
+				congestion_wait(BLK_RW_ASYNC,
+						DEFAULT_IO_TIMEOUT);
 				lock_page(cc->rpages[i]);
 				clear_page_dirty_for_io(cc->rpages[i]);
 				goto retry_write;
