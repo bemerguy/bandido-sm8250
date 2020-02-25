@@ -1774,6 +1774,8 @@ struct f2fs_sb_info {
 	struct f2fs_sec_blkops_dbg s_sec_dbg_entries[F2FS_SEC_BLKOPS_ENTRIES];
 	struct f2fs_sec_blkops_dbg s_sec_dbg_max_entry;
 #endif
+	struct kmem_cache *inline_xattr_slab;	/* inline xattr entry */
+	unsigned int inline_xattr_slab_size;	/* default inline xattr slab size */
 };
 
 struct f2fs_private_dio {
