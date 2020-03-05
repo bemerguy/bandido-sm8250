@@ -781,9 +781,6 @@ void __noreturn do_exit(long code)
 	task_defex_zero_creds(current);
 #endif
 
-	profile_task_exit(tsk);
-	kcov_task_exit(tsk);
-
 	WARN_ON(blk_needs_flush_plug(tsk));
 
 	if (unlikely(in_interrupt()))
@@ -799,6 +796,16 @@ void __noreturn do_exit(long code)
 	 * kernel address.
 	 */
 	set_fs(USER_DS);
+
+	if (unlikely(in_atomic())) {
+		pr_info("note: %s[%d] exited with preempt_count %d\n",
+			current->comm, task_pid_nr(current),
+			preempt_count());
+		preempt_count_set(PREEMPT_ENABLED);
+	}
+
+	profile_task_exit(tsk);
+	kcov_task_exit(tsk);
 
 	ptrace_event(PTRACE_EVENT_EXIT, code);
 
@@ -837,13 +844,6 @@ void __noreturn do_exit(long code)
 	 */
 	raw_spin_lock_irq(&tsk->pi_lock);
 	raw_spin_unlock_irq(&tsk->pi_lock);
-
-	if (unlikely(in_atomic())) {
-		pr_info("note: %s[%d] exited with preempt_count %d\n",
-			current->comm, task_pid_nr(current),
-			preempt_count());
-		preempt_count_set(PREEMPT_ENABLED);
-	}
 
 	/* sync mm's RSS info before statistics gathering */
 	if (tsk->mm)
