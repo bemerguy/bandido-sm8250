@@ -104,7 +104,6 @@
 #include "audit.h"
 #include "avc_ss.h"
 
-
 struct selinux_state selinux_state;
 
 #ifdef CONFIG_LOD_SEC
@@ -196,6 +195,7 @@ u32 rkp_get_offset_bp_cred(void)
 	return offsetof(struct task_security_struct,bp_cred);
 }
 #endif
+struct selinux_state selinux_state;
 
 /* SECMARK reference count */
 static atomic_t selinux_secmark_refcount = ATOMIC_INIT(0);
