@@ -12,7 +12,7 @@
 #include <asm/alternative.h>
 #include <asm/assembler.h>
 
-	.cpu		generic+crc
+	.arch		armv8-a+crc
 
 	.macro		__crc32, c
 0:	subs		x2, x2, #16
