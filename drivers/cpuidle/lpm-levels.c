@@ -1724,6 +1724,16 @@ static int lpm_suspend_enter(suspend_state_t state)
 		pr_err("Failed suspend\n");
 		return 0;
 	}
+
+	/*
+	 * Print the clocks and regulators which are enabled during
+	 * system suspend.  This debug information is useful to know
+	 * which resources are enabled and preventing the system level
+	 * LPMs (XO and Vmin).
+	 */
+	clock_debug_print_enabled();
+	regulator_debug_print_enabled();
+
 	cpu_prepare(lpm_cpu, idx, false);
 	cluster_prepare(cluster, cpumask, idx, false, 0);
 
