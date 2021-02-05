@@ -34,7 +34,6 @@ config TOOLS_SUPPORT_RELR
 
 config CONSTRUCTORS
 	bool
-	depends on !UML
 
 config IRQ_WORK
 	bool
