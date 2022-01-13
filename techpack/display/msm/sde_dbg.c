@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
+ * Copyright (c) 2021-2022 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2009-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -3206,7 +3207,6 @@ static void _sde_dbg_dump_sde_dbg_bus(struct sde_dbg_sde_debug_bus *bus)
 	u32 *dump_addr = NULL;
 	u32 status = 0;
 	struct sde_debug_bus_entry *head;
-	phys_addr_t phys = 0;
 	int list_size;
 	int i;
 	u32 offset;
@@ -3244,8 +3244,7 @@ static void _sde_dbg_dump_sde_dbg_bus(struct sde_dbg_sde_debug_bus *bus)
 
 	if (in_mem) {
 		if (!(*dump_mem))
-			*dump_mem = dma_alloc_coherent(sde_dbg_base.dev,
-				list_size, &phys, GFP_KERNEL);
+			*dump_mem = vzalloc(list_size);
 
 		if (*dump_mem) {
 			dump_addr = *dump_mem;
@@ -3355,7 +3354,6 @@ static void _sde_dbg_dump_vbif_dbg_bus(struct sde_dbg_vbif_debug_bus *bus)
 	u32 value, d0, d1;
 	unsigned long reg, reg1, reg2;
 	struct vbif_debug_bus_entry *head;
-	phys_addr_t phys = 0;
 	int i, list_size = 0;
 	void __iomem *mem_base = NULL;
 	struct vbif_debug_bus_entry *dbg_bus;
@@ -3405,8 +3403,7 @@ static void _sde_dbg_dump_vbif_dbg_bus(struct sde_dbg_vbif_debug_bus *bus)
 
 	if (in_mem) {
 		if (!(*dump_mem))
-			*dump_mem = dma_alloc_coherent(sde_dbg_base.dev,
-				list_size, &phys, GFP_KERNEL);
+			*dump_mem = vzalloc(list_size);
 
 		if (*dump_mem) {
 			dump_addr = *dump_mem;
@@ -4027,7 +4024,7 @@ static ssize_t sde_recovery_regdump_read(struct file *file, char __user *ubuf,
 	mutex_lock(&sde_dbg_base.mutex);
 	if (!rbuf->dump_done && !rbuf->cur_blk) {
 		if (!rbuf->buf)
-			rbuf->buf = kzalloc(DUMP_BUF_SIZE, GFP_KERNEL);
+			rbuf->buf = vzalloc(DUMP_BUF_SIZE);
 		if (!rbuf->buf) {
 			len =  -ENOMEM;
 			goto err;
