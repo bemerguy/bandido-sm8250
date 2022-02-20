@@ -592,30 +592,6 @@ int main(int ac, char **av)
 				defconfig_file);
 			exit(1);
 		}
-
-		name = getenv("KCONFIG_VARIANT");
-		if (name) {
-			if (conf_read_simple(name, S_DEF_USER, false)) {
-				fprintf(stderr,
-					"***\n"
-					  "*** Can't find variant configuration \"%s\"!\n"
-					  "***\n",
-					name);
-				exit(1);
-			}
-		}
-
-		name = getenv("KCONFIG_DEBUG");
-		if (name) {
-			if (conf_read_simple(name, S_DEF_USER, false)) {
-				fprintf(stderr,
-					"***\n"
-					  "*** Can't find debug configuration \"%s\"!\n"
-					  "***\n",
-					name);
-				exit(1);
-			}
-		}
 		break;
 	case savedefconfig:
 	case syncconfig:
