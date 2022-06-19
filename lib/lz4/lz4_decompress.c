@@ -402,6 +402,7 @@ static FORCE_INLINE int __LZ4_decompress_generic(
 #endif
 	/* Main Loop : decode sequences */
 	while (1) {
+		token = *ip++;
 		length = token >> ML_BITS;
 
 		/* ip < iend before the increment */
