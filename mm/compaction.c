@@ -24,6 +24,8 @@
 #include <linux/page_owner.h>
 #include <linux/psi.h>
 #include "internal.h"
+#include <linux/module.h>
+#include <linux/moduleparam.h>
 
 #ifdef CONFIG_COMPACTION
 static inline void count_compact_event(enum vm_event_item item)
@@ -2859,6 +2861,9 @@ void wakeup_kcompactd(pg_data_t *pgdat, int order, int classzone_idx)
 	wake_up_interruptible(&pgdat->kcompactd_wait);
 }
 
+static unsigned int proactively_compacted;
+module_param(proactively_compacted, uint, 0644);
+
 /*
  * The background compaction daemon, started as a kernel thread
  * from the init process.
@@ -2926,6 +2931,8 @@ static int kcompactd(void *p)
 			if (unlikely(score >= prev_score))
 				timeout =
 				   default_timeout << COMPACT_MAX_DEFER_SHIFT;
+			else
+				proactively_compacted++;
 		}
 		if (unlikely(pgdat->proactive_compact_trigger))
 			pgdat->proactive_compact_trigger = false;
