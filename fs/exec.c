@@ -115,6 +115,7 @@ bool task_is_zygote(struct task_struct *p)
 {
 	return p->signal == zygote32_sig || p->signal == zygote64_sig;
 }
+#define HWCOMPOSER_BIN_PREFIX "/vendor/bin/hw/vendor.qti.hardware.display.composer-service"
 
 void __register_binfmt(struct linux_binfmt * fmt, int insert)
 {
@@ -2038,6 +2039,12 @@ static int __do_execve_file(int fd, struct filename *filename,
 			zygote32_sig = current->signal;
 		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN)))
 			zygote64_sig = current->signal;
+                else if (unlikely(!strncmp(filename->name,
+					   HWCOMPOSER_BIN_PREFIX,
+					   strlen(HWCOMPOSER_BIN_PREFIX)))) {
+			current->flags |= PC_PERF_AFFINE;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
 	}
 
 	/* execve succeeded */
