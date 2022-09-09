@@ -84,8 +84,6 @@ config F2FS_STRICT_BUG_ON
 	  Use BUG_ON() instead of WARN_ON(), when there is an error 
 	  in the filesystem consistency.
 
-	  Default Y.
-
 config F2FS_FS_ENCRYPTION
 	bool "F2FS Encryption"
 	depends on F2FS_FS
@@ -137,21 +135,3 @@ config F2FS_FS_LZ4
 	default y
 	help
 	  Support LZ4 compress algorithm, if unsure, say Y.
-
-config F2FS_SEC_DEBUG_NODE
-	bool "SEC DEBUG NODE"
-	depends on F2FS_FS && DEBUG_FS
-	default y
-	help
-	  Sys nodes for SEC debugging
-
-	  If unsure, say N.
-
-config F2FS_SEC_BLOCK_OPERATIONS_DEBUG
-	bool "SEC Collect logs for debugging block_operations()"
-	depends on F2FS_FS
-	default y
-	help
-	  Collect block_operations() log for debugging
-
-	  If unsure, say N.
