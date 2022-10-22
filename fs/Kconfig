@@ -8,6 +8,9 @@ menu "File systems"
 config DCACHE_WORD_ACCESS
        bool
 
+config INTERRUPTIBLE_SYNC
+        bool "Support interruptible sync for Samsung Mobile Device"
+
 if BLOCK
 
 config FS_IOMAP
@@ -105,6 +108,8 @@ config MANDATORY_FILE_LOCKING
 
 source "fs/crypto/Kconfig"
 
+source "fs/verity/Kconfig"
+
 source "fs/notify/Kconfig"
 
 source "fs/quota/Kconfig"
@@ -112,6 +117,7 @@ source "fs/quota/Kconfig"
 source "fs/autofs/Kconfig"
 source "fs/fuse/Kconfig"
 source "fs/overlayfs/Kconfig"
+source "fs/incfs/Kconfig"
 
 menu "Caches"
 
@@ -133,6 +139,7 @@ if BLOCK
 menu "DOS/FAT/NT Filesystems"
 
 source "fs/fat/Kconfig"
+source "fs/sdfat/Kconfig"
 source "fs/ntfs/Kconfig"
 
 endmenu
@@ -234,6 +241,7 @@ source "fs/orangefs/Kconfig"
 source "fs/adfs/Kconfig"
 source "fs/affs/Kconfig"
 source "fs/ecryptfs/Kconfig"
+source "fs/sdcardfs/Kconfig"
 source "fs/hfs/Kconfig"
 source "fs/hfsplus/Kconfig"
 source "fs/befs/Kconfig"
@@ -313,5 +321,24 @@ endif # NETWORK_FILESYSTEMS
 
 source "fs/nls/Kconfig"
 source "fs/dlm/Kconfig"
+source "fs/unicode/Kconfig"
+
+config SEC_DEBUG_FPUT_WATCHDOG
+	bool "fput watchdog"
+	depends on SEC_DEBUG
+	---help---
+	  Sets up a watchdog timer to capture file and task that are
+	  locked up attempting to fput.
+	  A detected lockup causes system panic with message.
+
+config SEC_DEBUG_FPUT_WATCHDOG_TIMEOUT
+	int "Watchdog timeout in seconds"
+	range 1 300
+	default 180
+	depends on SEC_DEBUG_FPUT_WATCHDOG
+
+config FS_HPB
+	bool "Support HPB on Filesystem"
+	default n
 
 endmenu
