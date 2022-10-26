@@ -376,7 +376,7 @@ KBUILD_HOSTLDLIBS   := $(HOST_LFS_LIBS) $(HOSTLDLIBS)
 CPP		= $(CC) -E
 AS		= = $(CROSS_COMPILE)as
 ifneq ($(LLVM),)
-CC		= $(CLANG_DIR)clang
+CC		= ccache $(CLANG_DIR)clang
 LD		= $(CLANG_DIR)ld.lld
 AR		= $(CLANG_DIR)llvm-ar
 NM		= $(CLANG_DIR)llvm-nm
@@ -384,7 +384,7 @@ OBJCOPY		= $(CLANG_DIR)llvm-objcopy
 OBJDUMP		= $(CLANG_DIR)llvm-objdump
 STRIP		= $(CLANG_DIR)llvm-strip
 else
-CC		= $(CROSS_COMPILE)gcc
+CC		= ccache $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)ld
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -711,7 +711,7 @@ else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS   += -O3 $(OPTS)
+KBUILD_CFLAGS   += -O2 $(OPTS)
 ifeq ($(CONFIG_LTO_CLANG),y)
 ifeq ($(CONFIG_LD_IS_LLD), y)
 KBUILD_LDFLAGS	+= -O2

@@ -1,11 +1,12 @@
 #!/bin/bash
 
 export ARCH=arm64
+rm -rf out
 mkdir out
 
 BUILD_CROSS_COMPILE=aarch64-linux-gnu-
 CLANG_TRIPLE=aarch64-unknown-none-eabi
-#CLANG_TRIPLE=aarch64-linux-gnu-
+
 export CLANG_DIR="/usr/lib/llvm-16/bin/"
 KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 
@@ -18,13 +19,13 @@ CPU=$(($(nproc) - 1))
 
 make -j$CPU -C $(pwd) O=$(pwd)/out $KERNEL_MAKE_ENV ARCH=arm64 CROSS_COMPILE=$BUILD_CROSS_COMPILE LLVM=1 CLANG_TRIPLE=$CLANG_TRIPLE r8q_defconfig
 
-if [ $variant == "1" ]; then
+if [[ $variant == "1" ]]; then
 	echo "
 Compiling for 4G variant
 "
 	MODEL="G780G"
 
-elif [ $variant == "2" ]; then
+elif [[ $variant == "2" ]]; then
 	echo "
 Compiling for 5G variant
 "
