@@ -1765,8 +1765,8 @@ static int lpm_suspend_prepare(void)
 	regulator_showall_enabled();
 	clock_debug_print_enabled();
 
-	debug_masterstats_show("entry");
-	debug_rpmstats_show("entry");
+	//debug_masterstats_show("entry");
+	//debug_rpmstats_show("entry");
 #endif /* CONFIG_SEC_PM */
 
 #ifdef CONFIG_SEC_PM_DEBUG
@@ -1787,8 +1787,8 @@ static void lpm_suspend_wake(void)
 	lpm_stats_suspend_exit();
 
 #ifdef CONFIG_SEC_PM
-	debug_rpmstats_show("exit");
-	debug_masterstats_show("exit");
+	//debug_rpmstats_show("exit");
+	//debug_masterstats_show("exit");
 #endif
 }
 
