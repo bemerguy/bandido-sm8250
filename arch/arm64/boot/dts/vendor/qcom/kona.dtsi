@@ -347,7 +347,7 @@
 	};
 
 	chosen {
-		bootargs = "rcupdate.rcu_expedited=1 rcu_nocbs=0-7 cgroup.memory=nokmem";
+		bootargs = "noirqdebug rcu_nocbs=4-7 cgroup.memory=nokmem";
 	};
 
 	firmware: firmware {
@@ -392,6 +392,15 @@
 			compatible = "qcom,cmd-db";
 			no-map;
 		};
+		
+		ramoops: ramoops@80880000 {
+			compatible = "removed-dma-pool", "ramoops";
+			reg = <0 0x80880000 0 0x00080000>;
+			record-size = <0x10000>;
+			console-size = <0x60000>;
+			pmsg-size = <0x10000>;
+			no-map;
+		};
 
 		smem_mem: smem_region@80900000 {
 			no-map;
@@ -400,7 +409,7 @@
 
 		removed_mem: removed_region@80b00000 {
 			no-map;
-			reg = <0x0 0x80b00000 0x0 0x5300000>;
+			reg = <0x0 0x80b00000 0x0 0x5700000>;
 		};
 
 		pil_camera_mem: pil_camera_region@86200000 {
@@ -762,6 +771,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU0>;
+		status = "disabled";
 	};
 
 	jtag_mm1: jtagmm@7140000 {
@@ -773,6 +783,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU1>;
+		status = "disabled";
 	};
 
 	jtag_mm2: jtagmm@7240000 {
@@ -784,6 +795,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU2>;
+		status = "disabled";
 	};
 
 	jtag_mm3: jtagmm@7340000 {
@@ -795,6 +807,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU3>;
+		status = "disabled";
 	};
 
 	jtag_mm4: jtagmm@7440000 {
@@ -806,6 +819,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU4>;
+		status = "disabled";
 	};
 
 	jtag_mm5: jtagmm@7540000 {
@@ -817,6 +831,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU5>;
+		status = "disabled";
 	};
 
 	jtag_mm6: jtagmm@7640000 {
@@ -828,6 +843,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU6>;
+		status = "disabled";
 	};
 
 	jtag_mm7: jtagmm@7740000 {
@@ -839,6 +855,7 @@
 		clock-names = "core_clk";
 
 		qcom,coresight-jtagmm-cpu = <&CPU7>;
+		status = "disabled";
 	};
 
 	qcom,devfreq-l3 {
@@ -924,7 +941,7 @@
 		BW_OPP_ENTRY_DDR(  681, 4, 0x180); /*  2597 MB/s */
 		BW_OPP_ENTRY_DDR(  768, 4, 0x180); /*  2929 MB/s */
 		BW_OPP_ENTRY_DDR( 1017, 4, 0x180); /*  3879 MB/s */
-		BW_OPP_ENTRY_DDR( 1353, 4,  0x80); /*  5161 MB/s */
+		BW_OPP_ENTRY_DDR( 1353, 4, 0x180); /*  5161 MB/s */
 		BW_OPP_ENTRY_DDR( 1555, 4, 0x180); /*  5931 MB/s */
 		BW_OPP_ENTRY_DDR( 1804, 4, 0x180); /*  6881 MB/s */
 		BW_OPP_ENTRY_DDR( 2092, 4, 0x180); /*  7980 MB/s */
@@ -941,7 +958,7 @@
 		BW_OPP_ENTRY_DDR(  681, 4, 0x180); /*  2597 MB/s */
 		BW_OPP_ENTRY_DDR(  768, 4, 0x180); /*  2929 MB/s */
 		BW_OPP_ENTRY_DDR( 1017, 4, 0x180); /*  3879 MB/s */
-		BW_OPP_ENTRY_DDR( 1353, 4,  0x80); /*  5161 MB/s */
+		BW_OPP_ENTRY_DDR( 1353, 4, 0x180); /*  5161 MB/s */
 		BW_OPP_ENTRY_DDR( 1555, 4, 0x180); /*  5931 MB/s */
 		BW_OPP_ENTRY_DDR( 1804, 4, 0x180); /*  6881 MB/s */
 		BW_OPP_ENTRY_DDR( 2092, 4, 0x180); /*  7980 MB/s */
@@ -2343,7 +2360,7 @@
 
 	qcom_seecom: qseecom@82400000 {
 		compatible = "qcom,qseecom";
-		reg = <0x82400000 0x3A00000>;
+		reg = <0x82400000 0x3E00000>;
 		reg-names = "secapp-region";
 		memory-region = <&qseecom_mem>;
 		qcom,hlos-num-ce-hw-instances = <1>;
@@ -5027,7 +5044,6 @@
 #include "kona-pinctrl.dtsi"
 #include "kona-smp2p.dtsi"
 #include "kona-usb.dtsi"
-#include "kona-coresight.dtsi"
 #include "kona-sde.dtsi"
 #include "kona-sde-pll.dtsi"
 #include "msm-rdbg.dtsi"
