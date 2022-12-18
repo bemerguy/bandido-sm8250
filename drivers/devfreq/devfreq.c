@@ -1213,7 +1213,7 @@ static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 	struct devfreq *df = to_devfreq(dev);
 	unsigned long value;
 	int ret;
-
+#if 0
 	ret = sscanf(buf, "%lu", &value);
 	if (ret != 1)
 		return -EINVAL;
@@ -1242,6 +1242,7 @@ static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 unlock:
 	mutex_unlock(&df->lock);
 	mutex_unlock(&df->event_lock);
+#endif
 	return ret;
 }
 
@@ -1383,7 +1384,7 @@ static struct attribute *devfreq_attrs[] = {
 	&dev_attr_available_frequencies.attr,
 	&dev_attr_target_freq.attr,
 	&dev_attr_polling_interval.attr,
-	&dev_attr_min_freq.attr,
+//	&dev_attr_min_freq.attr,
 	&dev_attr_max_freq.attr,
 	&dev_attr_trans_stat.attr,
 	NULL,
