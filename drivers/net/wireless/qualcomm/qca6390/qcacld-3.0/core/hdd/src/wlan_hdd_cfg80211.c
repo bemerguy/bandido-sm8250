@@ -3996,9 +3996,9 @@ __wlan_hdd_cfg80211_get_features(struct wiphy *wiphy,
 			QCA_WLAN_VENDOR_FEATURE_SELF_MANAGED_REGULATORY);
 #endif
 
-	if (wlan_hdd_thermal_config_support())
-		wlan_hdd_cfg80211_set_feature(feature_flags,
-					QCA_WLAN_VENDOR_FEATURE_THERMAL_CONFIG);
+	//if (wlan_hdd_thermal_config_support())
+	//	wlan_hdd_cfg80211_set_feature(feature_flags,
+	//				QCA_WLAN_VENDOR_FEATURE_THERMAL_CONFIG);
 
 	skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy, sizeof(feature_flags) +
 			NLMSG_HDRLEN);
