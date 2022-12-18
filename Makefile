@@ -460,7 +460,7 @@ export CFLAGS_KASAN CFLAGS_KASAN_NOSANITIZE CFLAGS_UBSAN
 export KBUILD_AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 export KBUILD_AFLAGS_MODULE KBUILD_CFLAGS_MODULE KBUILD_LDFLAGS_MODULE
 export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
-export KBUILD_ARFLAGS
+export KBUILD_ARFLAGS BOPTS
 
 # When compiling out-of-tree modules, put MODVERDIR in the module
 # tree rather than in the kernel tree. The kernel tree might
@@ -703,7 +703,8 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
 
-OPTS           = -ffast-math -finline-functions -funroll-loops -fno-signed-zeros -freciprocal-math -ffp-contract=fast -fno-trapping-math -ffinite-math-only
+BOPTS           = -O2 -ffast-math -finline-functions -funroll-loops
+LOPTS		= -Os
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
@@ -711,7 +712,7 @@ else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS   += -O2 $(OPTS)
+KBUILD_CFLAGS   += $(BOPTS)
 ifeq ($(CONFIG_LTO_CLANG),y)
 ifeq ($(CONFIG_LD_IS_LLD), y)
 KBUILD_LDFLAGS	+= -O2
@@ -731,7 +732,7 @@ KBUILD_CFLAGS	+= -mllvm -polly \
 		   -mllvm -polly-ast-use-context \
 		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-invariant-load-hoisting
+		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
