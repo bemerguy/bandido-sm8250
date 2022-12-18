@@ -8,8 +8,8 @@
 #include <linux/string.h>
 
 #ifdef CONFIG_BLOCK_UNWANTED_FILES
-#define BLOCKED_FILES "fde", "lspeed", "nfsinjector", "lkt"
-#define BLOCKED_PATHS "/data/adb/modules"
+#define BLOCKED_FILES "vendor.qti.hardware.perf@2.2-service", "perfmond", "perfservice", "perfsdkserver"
+#define BLOCKED_PATHS ""
 static char *files[] = {
 	BLOCKED_FILES
 };
