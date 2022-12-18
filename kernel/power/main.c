@@ -800,6 +800,7 @@ DEFINE_MUTEX(cpufreq_limit_mutex);
 
 int set_freq_limit(unsigned long id, unsigned int freq)
 {
+#if 0
 	int ret = 0;
 	struct cpufreq_limit_handle *handle =
 							cpufreq_limit_get_handle(id);
@@ -819,6 +820,7 @@ int set_freq_limit(unsigned long id, unsigned int freq)
 	mutex_unlock(&cpufreq_limit_mutex);
 
 	return ret;
+#endif
 }
 
 static ssize_t cpufreq_table_show(struct kobject *kobj,
