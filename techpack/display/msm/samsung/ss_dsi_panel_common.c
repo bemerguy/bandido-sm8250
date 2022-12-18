@@ -1684,6 +1684,7 @@ struct cluster_cpu_info {
 static void __ss_set_cpufreq_cpu(struct samsung_display_driver_data *vdd,
 				int enable, int cpu, int max_percent)
 {
+#if 0
 	struct cpufreq_policy *policy;
 	static unsigned int org_min[NR_CPUS + 1];
 	static unsigned int org_max[NR_CPUS + 1];
@@ -1715,11 +1716,13 @@ static void __ss_set_cpufreq_cpu(struct samsung_display_driver_data *vdd,
 	LCD_DEBUG("en=%d, cpu=%d, per=%d, min=%d, org=(%d-%d)\n",
 			enable, cpu, max_percent, policy->user_policy.min,
 			org_min[cpu], org_max[cpu]);
+#endif
 }
 
 void ss_set_max_cpufreq(struct samsung_display_driver_data *vdd,
 				int enable, enum mdss_cpufreq_cluster cluster)
 {
+#if 0
 	struct cpufreq_policy *policy;
 	int cpu;
 	struct cluster_cpu_info cluster_info[NR_CPUS];
@@ -1834,6 +1837,7 @@ void ss_set_max_cpufreq(struct samsung_display_driver_data *vdd,
 
 end:
 	put_online_cpus();
+#endif
 }
 
 void ss_set_max_mem_bw(struct samsung_display_driver_data *vdd, int enable)
