@@ -385,6 +385,55 @@ static const struct file_operations xlog_dump_ops = {
 	.release = single_release,
 };
 
+#define SS_ONCE_LOG_BUF_MAX	(1024)
+static debug_display_read_once(struct samsung_display_driver_data *vdd,
+				char __user *buff, loff_t *ppos)
+{
+	struct dsi_panel *panel = GET_DSI_PANEL(vdd);
+	int scope;
+	u32 min_div, max_div;
+	char buf[SS_ONCE_LOG_BUF_MAX];
+	ssize_t len = 0;
+
+
+	len += snprintf(buf + len, SS_ONCE_LOG_BUF_MAX - len, "VRR: adj: %d%s\n",
+		vdd->vrr.adjusted_refresh_rate,
+		vdd->vrr.adjusted_sot_hs_mode ? "HS" : "NM");
+
+	if (panel && panel->cur_mode) {
+		len += snprintf(buf + len, SS_ONCE_LOG_BUF_MAX - len, "VRR: cur_mode:  %dx%d@%d%s\n",
+			panel->cur_mode->timing.h_active,
+			panel->cur_mode->timing.v_active,
+			panel->cur_mode->timing.refresh_rate,
+			panel->cur_mode->timing.sot_hs_mode ? "HS" : "NM");
+	}
+
+	if (vdd->vrr.lfd.support_lfd) {
+		for (scope = 0; scope < LFD_SCOPE_MAX; scope++) {
+			ss_get_lfd_div(vdd, scope, &min_div, &max_div);
+			len += snprintf(buf + len, SS_ONCE_LOG_BUF_MAX - len,
+					"LFD: scope=%s: LFD freq: %dhz ~ %dhz, div: %d ~ %d\n",
+					lfd_scope_name[scope],
+					DIV_ROUND_UP(vdd->vrr.lfd.base_rr, min_div),
+					DIV_ROUND_UP(vdd->vrr.lfd.base_rr, max_div),
+					min_div, max_div);
+		}
+	}
+
+	/* Limit maximum copy_to_user size to one PAGE_SIZE, to avoid error */
+	if (len > PAGE_SIZE) {
+		LCD_ERR("len(%zd) is bigger than one PAGE_SIZE\n", len);
+		return -EFAULT;
+	}
+
+	if (copy_to_user(buff, buf, len))
+		return -EFAULT;
+
+	*ppos += len;
+	return len;
+
+}
+
 static ssize_t debug_display_read(struct file *file, char __user *buff,
 		size_t count, loff_t *ppos)
 {
