@@ -6,16 +6,14 @@ else
 	KERNEL_BUILD := n
 endif
 
+# Force user build
+TARGET_BUILD_VARIANT := user
+
 ifeq ($(KERNEL_BUILD), y)
 	# These are provided in external module based builds
 	# Need to explicitly define for Kernel-based builds
 	MODNAME := wlan
-	#WLAN_ROOT := drivers/staging/qcacld-3.0
-ifeq ($(CONFIG_ICNSS), y)	
-	WLAN_ROOT := drivers/net/wireless/qualcomm/wcn39xx/qcacld-3.0
-else
-	WLAN_ROOT := drivers/net/wireless/qualcomm/qca6390/qcacld-3.0
-endif
+	WLAN_ROOT := drivers/staging/qcacld-3.0
 	WLAN_COMMON_ROOT := ../qca-wifi-host-cmn
 	WLAN_COMMON_INC := $(WLAN_ROOT)/$(WLAN_COMMON_ROOT)
 	WLAN_FW_API := $(WLAN_ROOT)/../fw-api/
@@ -50,7 +48,7 @@ include $(WLAN_CFG_OVERRIDE_FILE)
 $(warning "Overriding WLAN config with: $(shell cat $(WLAN_CFG_OVERRIDE_FILE))")
 endif
 
-include $(WLAN_ROOT)/configs/$(CONFIG_QCA_CLD_WLAN_PROFILE)_defconfig
+include $(WLAN_ROOT)/configs/$(patsubst "%",%,$(CONFIG_QCA_CLD_WLAN_PROFILE))_defconfig
 
 ############ UAPI ############
 UAPI_DIR :=	uapi
@@ -2402,7 +2400,6 @@ cppflags-$(CONFIG_WLAN_TX_FLOW_CONTROL_LEGACY) += -DQCA_LL_LEGACY_TX_FLOW_CONTRO
 cppflags-$(CONFIG_WLAN_PDEV_TX_FLOW_CONTROL) += -DQCA_LL_PDEV_TX_FLOW_CONTROL
 
 ifeq ($(BUILD_DEBUG_VERSION), y)
-cppflags-y +=	-DWLAN_DEBUG
 ifeq ($(CONFIG_TRACE_RECORD_FEATURE), y)
 cppflags-y +=	-DTRACE_RECORD \
 		-DLIM_TRACE_RECORD \
@@ -3302,22 +3299,8 @@ EXTRA_CFLAGS += -DSEC_WRITE_VERSION_IN_SYSFS
 EXTRA_CFLAGS += -DSEC_WRITE_SOFTAP_INFO_IN_SYSFS
 #EXTRA_CFLAGS += -DSEC_WRITE_ANT_GPIO_INFO_IN_SYSFS
 
-ifeq ($(shell secgetspf SEC_PRODUCT_FEATURE_WLAN_SUPPORT_MIMO), TRUE)
-EXTRA_CFLAGS += -DSEC_CONFIG_SUPPORT_MIMO
 endif
 
-endif
-
-# Currently, for versions of gcc which support it, the kernel Makefile
-# is disabling the maybe-uninitialized warning.  Re-enable it for the
-# WLAN driver.  Note that we must use ccflags-y here so that it
-# will override the kernel settings.
-ifeq ($(call cc-option-yn, -Wmaybe-uninitialized), y)
-ccflags-y += -Wmaybe-uninitialized
-ifneq (y,$(CONFIG_ARCH_MSM))
-ccflags-y += -Wframe-larger-than=4096
-endif
-endif
 ccflags-y += -Wmissing-prototypes
 
 ifeq ($(call cc-option-yn, -Wheader-guard), y)
@@ -3371,6 +3354,8 @@ ifeq ($(findstring arm, $(ARCH)),)
 else
 	ccflags-y += -DWLAN_HOST_ARCH_ARM=1
 endif
+
+ccflags-y += $(call cc-option, -Os)
 
 # inject some build related information
 ifeq ($(CONFIG_BUILD_TAG), y)
