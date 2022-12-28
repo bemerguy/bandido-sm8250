@@ -7,12 +7,15 @@ ARCH := x86
 endif
 
 # always use the host compiler
+ifneq ($(LLVM),)
+HOSTAR	?= $(CLANG_DIR)llvm-ar
+HOSTCC	?= $(CLANG_DIR)clang
+HOSTLD	?= $(CLANG_DIR)ld.lld
+else
 HOSTAR	?= ar
 HOSTCC	?= gcc
 HOSTLD	?= ld
-AR	 = $(HOSTAR)
-CC	 = $(HOSTCC)
-LD	 = $(HOSTLD)
+endif
 
 ifeq ($(srctree),)
 srctree := $(patsubst %/,%,$(dir $(CURDIR)))

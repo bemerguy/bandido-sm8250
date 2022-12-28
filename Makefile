@@ -512,15 +512,12 @@ endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
-ifneq ($(LLVM_IAS),1)
-CLANG_FLAGS	+= -no-integrated-as
-endif
 CLANG_FLAGS	+= $(call cc-option, -Wno-misleading-indentation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-bool-operation)
 CLANG_FLAGS	+= -Werror=unknown-warning-option
 CLANG_FLAGS	+= $(call cc-option, -Wno-unsequenced)
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
-KBUILD_AFLAGS	+= $(CLANG_FLAGS)
+KBUILD_AFLAGS	+= $(CLANG_FLAGS) -no-integrated-as
 export CLANG_FLAGS
 endif
 
@@ -703,8 +700,9 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
 
-BOPTS           = -O2 -ffast-math -finline-functions -funroll-loops
-LOPTS		= -Os
+BOPTS           = -O2
+#-ffast-math -finline-functions -funroll-loops
+LOPTS		= -Os -fno-inline-functions
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
@@ -713,12 +711,12 @@ ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 else
 KBUILD_CFLAGS   += $(BOPTS)
-ifeq ($(CONFIG_LTO_CLANG),y)
+endif
+endif
+
+ifeq ($(CONFIG_LTO_CLANG), y)
 ifeq ($(CONFIG_LD_IS_LLD), y)
-KBUILD_LDFLAGS	+= -O2
-LDFLAGS += --lto-O2
-endif
-endif
+  LDFLAGS += -Wl,-lto-O2
 endif
 endif
 
@@ -726,13 +724,13 @@ KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
 
 # Enable Clang Polly optimizations
-KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-run-dce \
-		   -mllvm -polly-run-inliner \
-		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-detect-keep-going \
-		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
+#KBUILD_CFLAGS	+= -mllvm -polly \
+#		   -mllvm -polly-run-dce \
+#		   -mllvm -polly-run-inliner \
+#		   -mllvm -polly-ast-use-context \
+#		   -mllvm -polly-detect-keep-going \
+#		   -mllvm -polly-vectorizer=stripmine \
+#		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
