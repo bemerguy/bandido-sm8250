@@ -47,9 +47,10 @@ if [[ -f "$IMAGE" ]]; then
 	cp $DTB AnyKernel3/dtb
 	cd AnyKernel3
 	zip -r9 bandido-kernel-$(date +"%Y%m%d%H%M").zip .
+
+	DATE_END=$(date +"%s")
+	DIFF=$(($DATE_END - $DATE_START))
+
+	echo -e "\nTime wasted: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.\n"
+
 fi
-
-DATE_END=$(date +"%s")
-DIFF=$(($DATE_END - $DATE_START))
-
-echo -e "\nTime wasted: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.\n"
