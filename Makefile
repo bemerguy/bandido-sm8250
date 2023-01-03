@@ -359,7 +359,7 @@ HOST_LFS_LDFLAGS := $(shell getconf LFS_LDFLAGS 2>/dev/null)
 HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 
 ifneq ($(LLVM),)
-HOSTCC	= $(CLANG_DIR)clang
+HOSTCC	= ccache $(CLANG_DIR)clang
 HOSTCXX	= $(CLANG_DIR)clang++
 else
 HOSTCC	= gcc
@@ -384,7 +384,7 @@ OBJCOPY		= $(CLANG_DIR)llvm-objcopy
 OBJDUMP		= $(CLANG_DIR)llvm-objdump
 STRIP		= $(CLANG_DIR)llvm-strip
 else
-CC		= ccache $(CROSS_COMPILE)gcc
+CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)ld
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
@@ -460,7 +460,7 @@ export CFLAGS_KASAN CFLAGS_KASAN_NOSANITIZE CFLAGS_UBSAN
 export KBUILD_AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 export KBUILD_AFLAGS_MODULE KBUILD_CFLAGS_MODULE KBUILD_LDFLAGS_MODULE
 export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
-export KBUILD_ARFLAGS BOPTS
+export KBUILD_ARFLAGS BOPTS LOPTS
 
 # When compiling out-of-tree modules, put MODVERDIR in the module
 # tree rather than in the kernel tree. The kernel tree might
@@ -700,8 +700,7 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
 
-BOPTS           = -O2
-#-ffast-math -finline-functions -funroll-loops
+BOPTS           = -O3 -ffast-math -finline-functions -funroll-loops
 LOPTS		= -Os -fno-inline-functions
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
@@ -714,23 +713,17 @@ KBUILD_CFLAGS   += $(BOPTS)
 endif
 endif
 
-ifeq ($(CONFIG_LTO_CLANG), y)
-ifeq ($(CONFIG_LD_IS_LLD), y)
-  LDFLAGS += -Wl,-lto-O2
-endif
-endif
-
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
 
 # Enable Clang Polly optimizations
-#KBUILD_CFLAGS	+= -mllvm -polly \
-#		   -mllvm -polly-run-dce \
-#		   -mllvm -polly-run-inliner \
-#		   -mllvm -polly-ast-use-context \
-#		   -mllvm -polly-detect-keep-going \
-#		   -mllvm -polly-vectorizer=stripmine \
-#		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
+KBUILD_CFLAGS	+= -mllvm -polly \
+		   -mllvm -polly-run-dce \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-detect-keep-going \
+		   -mllvm -polly-vectorizer=stripmine \
+		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
@@ -909,7 +902,7 @@ endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
 
 # Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=10 --lto-O3
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
