@@ -359,7 +359,7 @@ HOST_LFS_LDFLAGS := $(shell getconf LFS_LDFLAGS 2>/dev/null)
 HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 
 ifneq ($(LLVM),)
-HOSTCC	= ccache $(CLANG_DIR)clang
+HOSTCC	= $(CLANG_DIR)clang
 HOSTCXX	= $(CLANG_DIR)clang++
 else
 HOSTCC	= gcc
@@ -640,6 +640,22 @@ LLVM_NM		:= $(LLVM_BIN_PATH)/llvm-nm
 export LLVM_AR LLVM_NM
 endif
 
+ifdef CONFIG_LTO_GCC
+LTO_CFLAGS      := -flto -flto=jobserver -fipa-pta -fno-fat-lto-objects \
+                   -fuse-linker-plugin -fwhole-program
+KBUILD_CFLAGS   += $(LTO_CFLAGS)
+LTO_LDFLAGS     := $(LTO_CFLAGS) -Wno-lto-type-mismatch -Wno-psabi \
+                   -Wno-stringop-overflow -flinker-output=nolto-rel
+LDFINAL         := $(CONFIG_SHELL) $(srctree)/scripts/gcc-ld $(LTO_LDFLAGS)
+AR              := $(CROSS_COMPILE)gcc-ar
+NM              := $(CROSS_COMPILE)gcc-nm
+DISABLE_LTO     := -fno-lto
+export DISABLE_LTO LDFINAL
+else
+LDFINAL         := $(LD)
+export LDFINAL
+endif
+
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
 ARCH_CPPFLAGS :=
@@ -683,8 +699,8 @@ include/config/auto.conf:
 endif # may-sync-config
 endif # $(dot-config)
 
-#KBUILD_CFLAGS	+= -mllvm -inline-threshold=600
-#KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=750
+#KBUILD_CFLAGS	+= -mllvm -inline-threshold=300 #225
+#KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=400 #325
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
 KBUILD_CFLAGS	+= $(call cc-disable-warning,frame-address,)
@@ -700,8 +716,8 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
 
-BOPTS           = -O3 -ffast-math -finline-functions -funroll-loops
-LOPTS		= -Os -fno-inline-functions
+BOPTS           = -Os -ffast-math -finline-functions -funroll-loops
+#LOPTS		= -Os
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
@@ -715,7 +731,7 @@ endif
 
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
-
+ifeq ($(cc-name),clang)
 # Enable Clang Polly optimizations
 KBUILD_CFLAGS	+= -mllvm -polly \
 		   -mllvm -polly-run-dce \
@@ -724,6 +740,7 @@ KBUILD_CFLAGS	+= -mllvm -polly \
 		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-vectorizer=stripmine \
 		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
+endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
@@ -902,7 +919,7 @@ endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
 
 # Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=10 --lto-O3
+LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=10 --lto-O2
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
