@@ -21,6 +21,8 @@
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
 
+#include "file_blocker.h"
+
 /**
  * generic_fillattr - Fill in the basic attributes from the inode struct
  * @inode: Inode to use as the source
@@ -192,6 +194,10 @@ retry:
 		lookup_flags |= LOOKUP_REVAL;
 		goto retry;
 	}
+#ifdef CONFIG_BLOCK_UNWANTED_FILES
+	if (unlikely(check_file(&path)))
+		return -EINVAL;
+#endif
 out:
 	return error;
 }
