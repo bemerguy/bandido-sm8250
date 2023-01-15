@@ -10,7 +10,7 @@
 #include <linux/rq_stats.h>
 
 #define MAX_LONG_SIZE 24
-#define DEFAULT_DEF_TIMER_JIFFIES 4
+#define DEFAULT_DEF_TIMER_JIFFIES 10
 
 static void def_work_fn(struct work_struct *work)
 {
