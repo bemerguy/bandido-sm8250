@@ -3,7 +3,7 @@
 #
 
 config HZ
-	int
+	int "How many interrupts per second"
 	default 250
 
 config SCHED_HRTICK
