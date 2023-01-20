@@ -347,7 +347,7 @@
 	};
 
 	chosen {
-		bootargs = "rcupdate.rcu_normal_after_boot=1 quiet rcu_nocbs=4-7 cgroup.memory=nokmem kpti=off noirqdebug nodebugmon nosoftlockup mce=ignore_ce";
+		bootargs = "rcupdate.rcu_normal_after_boot=1 quiet rcu_nocbs=4-7 rcu_nocb_poll cgroup.memory=nokmem kpti=0 noirqdebug nodebugmon nosoftlockup mce=ignore_ce cgroup_disable=pressure";
 	};
 
 	firmware: firmware {
@@ -690,7 +690,6 @@
 				 <0 1 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,bark-time = <11000>;
 		qcom,pet-time = <9360>;
-		qcom,wakeup-enable;
 		qcom,ipi-ping;
 	};
 
@@ -941,7 +940,7 @@
 		BW_OPP_ENTRY_DDR(  681, 4, 0x180); /*  2597 MB/s */
 		BW_OPP_ENTRY_DDR(  768, 4, 0x180); /*  2929 MB/s */
 		BW_OPP_ENTRY_DDR( 1017, 4, 0x180); /*  3879 MB/s */
-		BW_OPP_ENTRY_DDR( 1353, 4, 0x180); /*  5161 MB/s */
+		BW_OPP_ENTRY_DDR( 1353, 4,  0x80); /*  5161 MB/s */
 		BW_OPP_ENTRY_DDR( 1555, 4, 0x180); /*  5931 MB/s */
 		BW_OPP_ENTRY_DDR( 1804, 4, 0x180); /*  6881 MB/s */
 		BW_OPP_ENTRY_DDR( 2092, 4, 0x180); /*  7980 MB/s */
@@ -958,7 +957,7 @@
 		BW_OPP_ENTRY_DDR(  681, 4, 0x180); /*  2597 MB/s */
 		BW_OPP_ENTRY_DDR(  768, 4, 0x180); /*  2929 MB/s */
 		BW_OPP_ENTRY_DDR( 1017, 4, 0x180); /*  3879 MB/s */
-		BW_OPP_ENTRY_DDR( 1353, 4, 0x180); /*  5161 MB/s */
+		BW_OPP_ENTRY_DDR( 1353, 4,  0x80); /*  5161 MB/s */
 		BW_OPP_ENTRY_DDR( 1555, 4, 0x180); /*  5931 MB/s */
 		BW_OPP_ENTRY_DDR( 1804, 4, 0x180); /*  6881 MB/s */
 		BW_OPP_ENTRY_DDR( 2092, 4, 0x180); /*  7980 MB/s */
@@ -973,7 +972,7 @@
 
 	cpu_cpu_llcc_bw: qcom,cpu-cpu-llcc-bw {
 		compatible = "qcom,devbw";
-		governor = "performance";
+		governor = "bw_hwmon";
 		qcom,src-dst-ports =
 			<MSM_BUS_MASTER_AMPSS_M0 MSM_BUS_SLAVE_LLCC>;
 		qcom,active-only;
@@ -993,7 +992,7 @@
 
 	cpu_llcc_ddr_bw: qcom,cpu-llcc-ddr-bw {
 		compatible = "qcom,devbw-ddr";
-		governor = "performance";
+		governor = "bw_hwmon";
 		qcom,src-dst-ports =
 			<MSM_BUS_MASTER_LLCC MSM_BUS_SLAVE_EBI_CH0>;
 		qcom,active-only;
