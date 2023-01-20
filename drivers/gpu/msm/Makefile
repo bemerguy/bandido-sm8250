@@ -1,6 +1,4 @@
 # SPDX-License-Identifier: GPL-2.0-only
-subdir-ccflags-y += $(BOPTS)
-
 ccflags-y += -I$(src)
 
 msm_kgsl_core-y = \
