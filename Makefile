@@ -409,7 +409,7 @@ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 NOSTDINC_FLAGS  =
 CFLAGS_MODULE   =
 AFLAGS_MODULE   =
-LDFLAGS_MODULE  =
+LDFLAGS_MODULE  = --strip-debug
 CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
 LDFLAGS_vmlinux =
@@ -715,9 +715,21 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, restrict)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
+KBUILD_CFLAGS   += $(call cc-disable-warning, array-bounds)
 
-BOPTS           = -Os -ffast-math -finline-functions -funroll-loops
-#LOPTS		= -Os
+ifeq ($(cc-name),clang)
+BOPTS           = -Os -ffast-math -finline-functions -funroll-loops -falign-functions
+else
+BOPTS		= -Os -ffast-math -finline-functions -funroll-loops -falign-functions -falign-jumps -falign-labels -falign-loops -fmodulo-sched -fmodulo-sched-allow-regmoves -fsingle-precision-constant -fvect-cost-model=cheap \
+                -fgcse-sm -fgcse-las -fipa-pta -ftree-lrs -ftree-lrs -fgcse-after-reload -fpeel-loops -fpredictive-commoning \
+                -freorder-blocks-algorithm=simple -fira-loop-pressure -fsplit-loops -foptimize-strlen \
+                -fversion-loops-for-strides -ftree-slp-vectorize -floop-interchange -ftracer -fsplit-paths -funswitch-loops \
+                --param=max-tail-merge-comparisons=20000 --param=max-gcse-memory=2147483647 \
+                --param=max-tail-merge-iterations=20000 --param=max-cse-path-length=4000 --param=max-vartrack-size=0 \
+                --param=max-cse-insns=4000 --param=max-cselib-memory-locations=500000 --param=max-reload-search-insns=500000 \
+                --param=max-modulo-backtrack-attempts=500000 --param=max-hoist-depth=0 --param=max-pending-list-length=1000 \
+                --param=max-delay-slot-live-search=10000 --param=max-delay-slot-insn-search=10000 --param=inline-min-speedup=10 --param=early-inlining-insns=30
+endif
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
@@ -919,10 +931,10 @@ endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
 
 # Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=10 --lto-O2
+#LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=10 --lto-O2
 
-KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
-KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
+#KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
+#KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
 
 KBUILD_LDFLAGS_MODULE += -T $(srctree)/scripts/module-lto.lds
 
