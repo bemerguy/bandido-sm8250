@@ -55,7 +55,7 @@
 #ifndef LZ4_FAST_DEC_LOOP
 #if defined(__i386__) || defined(__x86_64__)
 #define LZ4_FAST_DEC_LOOP 1
-#elif defined(__aarch64__) && !defined(__clang__)
+#elif defined(__aarch64__)
      /* On aarch64, we disable this optimization for clang because on certain
       * mobile chipsets and clang, it reduces performance. For more information
       * refer to https://github.com/lz4/lz4/pull/707. */
@@ -174,11 +174,9 @@ static FORCE_INLINE int __LZ4_decompress_generic(
 	 const size_t dictSize
 	 )
 {
-	const BYTE *ip = (const BYTE *)src;
-	const BYTE *const iend = ip + srcSize;
+	const BYTE * const iend = src + srcSize;
 
-	BYTE *op = (BYTE *) dst;
-	BYTE *const oend = op + outputSize;
+	BYTE * const oend = dst + outputSize;
 	BYTE *cpy;
 
 	const BYTE *const dictEnd = (const BYTE *)dictStart + dictSize;
@@ -538,7 +536,11 @@ static FORCE_INLINE int __LZ4_decompress_generic(
 				}
 			}
 
-			LZ4_memcpy(op, ip, length);
+			/*
+			 * supports overlapping memory regions; only matters
+			 * for in-place decompression scenarios
+			 */
+			LZ4_memmove(op, ip, length);
 			ip += length;
 			op += length;
 
