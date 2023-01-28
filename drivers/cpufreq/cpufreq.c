@@ -723,10 +723,8 @@ static ssize_t store_##file_name					\
 {									\
 	int ret, temp;							\
 	struct cpufreq_policy new_policy;				\
-									\
-	if (&policy->object == &policy->min)				\
-		return count;						\
-									\
+	if (!strcmp(current->comm, "init.qcom.post_")) {		\
+		return count; }						\
 	memcpy(&new_policy, policy, sizeof(*policy));			\
 	new_policy.min = policy->user_policy.min;			\
 	new_policy.max = policy->user_policy.max;			\
@@ -2363,9 +2361,13 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
  */
 void cpufreq_update_policy(unsigned int cpu)
 {
-	struct cpufreq_policy *policy = cpufreq_cpu_get(cpu);
+	struct cpufreq_policy *policy;
 	struct cpufreq_policy new_policy;
 
+        if (!strcmp(current->comm, "perf@2.2-servic"))
+		return;
+
+	policy = cpufreq_cpu_get(cpu);
 	if (!policy)
 		return;
 
