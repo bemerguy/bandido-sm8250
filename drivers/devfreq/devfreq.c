@@ -1207,13 +1207,13 @@ static ssize_t polling_interval_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(polling_interval);
 
-static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
+__maybe_unused static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 			      const char *buf, size_t count)
 {
 	struct devfreq *df = to_devfreq(dev);
 	unsigned long value;
 	int ret;
-#if 0
+
 	ret = sscanf(buf, "%lu", &value);
 	if (ret != 1)
 		return -EINVAL;
@@ -1242,7 +1242,7 @@ static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 unlock:
 	mutex_unlock(&df->lock);
 	mutex_unlock(&df->event_lock);
-#endif
+
 	return ret;
 }
 
@@ -1254,7 +1254,7 @@ static ssize_t min_freq_show(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%lu\n", MAX(df->scaling_min_freq, df->min_freq));
 }
 
-static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
+__maybe_unused static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
 			      const char *buf, size_t count)
 {
 	struct devfreq *df = to_devfreq(dev);
@@ -1291,7 +1291,7 @@ unlock:
 	mutex_unlock(&df->event_lock);
 	return ret;
 }
-static DEVICE_ATTR_RW(min_freq);
+static DEVICE_ATTR_RO(min_freq);
 
 static ssize_t max_freq_show(struct device *dev, struct device_attribute *attr,
 			     char *buf)
@@ -1300,7 +1300,7 @@ static ssize_t max_freq_show(struct device *dev, struct device_attribute *attr,
 
 	return sprintf(buf, "%lu\n", MIN(df->scaling_max_freq, df->max_freq));
 }
-static DEVICE_ATTR_RW(max_freq);
+static DEVICE_ATTR_RO(max_freq);
 
 static ssize_t available_frequencies_show(struct device *d,
 					  struct device_attribute *attr,
@@ -1384,7 +1384,7 @@ static struct attribute *devfreq_attrs[] = {
 	&dev_attr_available_frequencies.attr,
 	&dev_attr_target_freq.attr,
 	&dev_attr_polling_interval.attr,
-//	&dev_attr_min_freq.attr,
+	&dev_attr_min_freq.attr,
 	&dev_attr_max_freq.attr,
 	&dev_attr_trans_stat.attr,
 	NULL,
