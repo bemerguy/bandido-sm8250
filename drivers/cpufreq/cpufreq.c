@@ -723,7 +723,8 @@ static ssize_t store_##file_name					\
 {									\
 	int ret, temp;							\
 	struct cpufreq_policy new_policy;				\
-									\
+	if (!strcmp(current->comm, "init.qcom.post_")) {		\
+		return count; }						\
 	memcpy(&new_policy, policy, sizeof(*policy));			\
 	new_policy.min = policy->user_policy.min;			\
 	new_policy.max = policy->user_policy.max;			\
@@ -740,7 +741,7 @@ static ssize_t store_##file_name					\
 	return ret ? ret : count;					\
 }
 
-//store_one(scaling_min_freq, min);
+store_one(scaling_min_freq, min);
 store_one(scaling_max_freq, max);
 
 /**
@@ -917,7 +918,7 @@ cpufreq_freq_attr_ro(scaling_cur_freq);
 cpufreq_freq_attr_ro(bios_limit);
 cpufreq_freq_attr_ro(related_cpus);
 cpufreq_freq_attr_ro(affected_cpus);
-cpufreq_freq_attr_ro(scaling_min_freq);
+cpufreq_freq_attr_rw(scaling_min_freq);
 cpufreq_freq_attr_rw(scaling_max_freq);
 cpufreq_freq_attr_rw(scaling_governor);
 cpufreq_freq_attr_rw(scaling_setspeed);
@@ -2360,9 +2361,13 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
  */
 void cpufreq_update_policy(unsigned int cpu)
 {
-	struct cpufreq_policy *policy = cpufreq_cpu_get(cpu);
+	struct cpufreq_policy *policy;
 	struct cpufreq_policy new_policy;
 
+        if (!strcmp(current->comm, "perf@2.2-servic"))
+		return;
+
+	policy = cpufreq_cpu_get(cpu);
 	if (!policy)
 		return;
 
@@ -2390,7 +2395,6 @@ void cpufreq_update_policy(unsigned int cpu)
 	}
 
 	cpufreq_set_policy(policy, &new_policy);
-
 unlock:
 	up_write(&policy->rwsem);
 
