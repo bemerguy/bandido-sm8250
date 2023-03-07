@@ -2,6 +2,7 @@
 #
 # Makefile for some libs needed in the kernel.
 #
+subdir-ccflags-y += -O3
 
 ifdef CONFIG_FUNCTION_TRACER
 ORIG_CFLAGS := $(KBUILD_CFLAGS)
@@ -27,8 +28,6 @@ endif
 
 CFLAGS_string.o := $(call cc-option, -fno-stack-protector)
 endif
-
-ccflags-y += -O3
 
 lib-y := ctype.o string.o vsprintf.o cmdline.o \
 	 rbtree.o radix-tree.o timerqueue.o\
