@@ -1344,6 +1344,11 @@ static ssize_t min_clock_mhz_store(struct device *dev,
 	unsigned int freq;
 	struct kgsl_pwrctrl *pwr = &device->pwrctrl;
 
+	if (current->parent->pid == 1)
+		return -EINVAL;
+
+	pr_info("Bandido: %s min_clock_mhz_store %s %d\n", current->comm, buf, current->parent->pid);
+
 	ret = kgsl_sysfs_store(buf, &freq);
 	if (ret)
 		return ret;
@@ -1373,6 +1378,11 @@ static ssize_t max_clock_mhz_store(struct device *dev,
 	struct kgsl_device *device = dev_get_drvdata(dev);
 	unsigned int val = 0;
 	int ret;
+
+	if (current->parent->pid == 1)
+		return -EINVAL;
+
+	pr_info("Bandido: %s max_clock_mhz_store %s %d\n", current->comm, buf, current->parent->pid);
 
 	ret = kgsl_sysfs_store(buf, &val);
 	if (ret)
@@ -1492,7 +1502,7 @@ static DEVICE_ATTR_RW(bus_split);
 static DEVICE_ATTR_RW(force_no_nap);
 static DEVICE_ATTR_RO(gpu_model);
 static DEVICE_ATTR_RO(gpu_busy_percentage);
-static DEVICE_ATTR_RO(min_clock_mhz);
+static DEVICE_ATTR_RW(min_clock_mhz);
 static DEVICE_ATTR_RW(max_clock_mhz);
 static DEVICE_ATTR_RO(clock_mhz);
 static DEVICE_ATTR_RO(freq_table_mhz);
