@@ -2566,6 +2566,7 @@ bool cpus_share_cache(int this_cpu, int that_cpu)
 	return per_cpu(sd_llc_id, this_cpu) == per_cpu(sd_llc_id, that_cpu);
 }
 
+#if SCHED_FEAT_TTWU_QUEUE
 static inline bool ttwu_queue_cond(int cpu, int wake_flags)
 {
 	/*
@@ -2589,15 +2590,17 @@ static inline bool ttwu_queue_cond(int cpu, int wake_flags)
 
 static bool ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_flags)
 {
-#if SCHED_FEAT_TTWU_QUEUE
-	if (sched_feat(TTWU_QUEUE) && ttwu_queue_cond(cpu, wake_flags)) {
+	if (ttwu_queue_cond(cpu, wake_flags)) {
+		if (WARN_ON_ONCE(cpu == smp_processor_id()))
+			return false;
+
 		sched_clock_cpu(cpu); /* Sync clocks across CPUs */
 		__ttwu_queue_wakelist(p, cpu, wake_flags);
 		return true;
 	}
-#endif
 	return false;
 }
+#endif
 #endif /* CONFIG_SMP */
 
 static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
@@ -2856,6 +2859,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags,
 	 */
 	p->state = TASK_WAKING;
 
+#if SCHED_FEAT_TTWU_QUEUE
 	/*
 	 * If the owning (remote) CPU is still in the middle of schedule() with
 	 * this task as prev, considering queueing p on the remote CPUs wake_list
@@ -2865,6 +2869,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags,
 	 */
 	if (READ_ONCE(p->on_cpu) && ttwu_queue_wakelist(p, cpu, wake_flags | WF_ON_RQ))
 		goto unlock;
+#endif
 
 	/*
 	 * If the owning (remote) CPU is still in the middle of schedule() with
