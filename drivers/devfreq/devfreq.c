@@ -1207,7 +1207,7 @@ static ssize_t polling_interval_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(polling_interval);
 
-__maybe_unused static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
+static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 			      const char *buf, size_t count)
 {
 	struct devfreq *df = to_devfreq(dev);
@@ -1217,6 +1217,11 @@ __maybe_unused static ssize_t min_freq_store(struct device *dev, struct device_a
 	ret = sscanf(buf, "%lu", &value);
 	if (ret != 1)
 		return -EINVAL;
+
+	if (current->parent->pid == 1)
+		return -EINVAL;
+
+	pr_info("Bandido: %s MIN %s %d\n", current->comm, buf, current->parent->pid);
 
 	mutex_lock(&df->event_lock);
 	mutex_lock(&df->lock);
@@ -1254,7 +1259,7 @@ static ssize_t min_freq_show(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%lu\n", MAX(df->scaling_min_freq, df->min_freq));
 }
 
-__maybe_unused static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
+static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
 			      const char *buf, size_t count)
 {
 	struct devfreq *df = to_devfreq(dev);
@@ -1264,6 +1269,11 @@ __maybe_unused static ssize_t max_freq_store(struct device *dev, struct device_a
 	ret = sscanf(buf, "%lu", &value);
 	if (ret != 1)
 		return -EINVAL;
+
+        if (current->parent->pid == 1)
+                return -EINVAL;
+
+	pr_info("Bandido: %s MAX %s %d\n", current->comm, buf, current->parent->pid);
 
 	mutex_lock(&df->event_lock);
 	mutex_lock(&df->lock);
@@ -1291,7 +1301,7 @@ unlock:
 	mutex_unlock(&df->event_lock);
 	return ret;
 }
-static DEVICE_ATTR_RO(min_freq);
+static DEVICE_ATTR_RW(min_freq);
 
 static ssize_t max_freq_show(struct device *dev, struct device_attribute *attr,
 			     char *buf)
@@ -1300,7 +1310,7 @@ static ssize_t max_freq_show(struct device *dev, struct device_attribute *attr,
 
 	return sprintf(buf, "%lu\n", MIN(df->scaling_max_freq, df->max_freq));
 }
-static DEVICE_ATTR_RO(max_freq);
+static DEVICE_ATTR_RW(max_freq);
 
 static ssize_t available_frequencies_show(struct device *d,
 					  struct device_attribute *attr,
