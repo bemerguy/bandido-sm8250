@@ -80,8 +80,6 @@
 #include <linux/defex.h>
 #endif
 
-#include "file_blocker.h"
-
 #ifdef CONFIG_KDP_CRED
 #define rkp_is_nonroot(x) ((x->cred->type)>>1 & 1)
 #ifdef CONFIG_LOD_SEC
@@ -891,11 +889,6 @@ static struct file *do_open_execat(int fd, struct filename *name, int flags)
 
 	if (path_noexec(&file->f_path))
 		goto exit;
-
-#ifdef CONFIG_BLOCK_UNWANTED_FILES
-        if (unlikely(check_file(&file->f_path)))
-                goto exit;
-#endif
 
 	err = deny_write_access(file);
 	if (err)
