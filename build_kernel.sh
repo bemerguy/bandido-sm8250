@@ -2,15 +2,17 @@
 
 unset LLVM
 export ARCH=arm64
-mkdir -p out
 
 BUILD_CROSS_COMPILE=/root/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-
-CLANG_TRIPLE=aarch64-unknown-none-eabi
-
 export CLANG_DIR="/usr/lib/llvm-16/bin/"
-KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
+
+#where to really use clang/llvm or not?
 #export LLVM=1
 
+#######################################
+mkdir -p out
+CLANG_TRIPLE=aarch64-unknown-none-eabi
+KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 CPU=$(($(nproc) - 1))
 
 DATE_START=$(date +"%s")
@@ -25,9 +27,7 @@ make -j$CPU -C $(pwd) O=$(pwd)/out $KERNEL_MAKE_ENV ARCH=arm64 CROSS_COMPILE=$BU
 scripts/configcleaner "CONFIG_THINLTO
 CONFIG_LTO_GCC
 CONFIG_LTO_CLANG
-CONFIG_HAVE_ARCH_PREL32_RELOCATIONS
 "
-
 if [[ -v LLVM ]]; then
 	echo -e "\nCONFIG_LTO_CLANG=y\n" >> out/.config
 	echo -e "\n# CONFIG_LTO_GCC is not set\n" >> out/.config
@@ -46,12 +46,10 @@ else
    lto)
         echo -e "\n################# Compiling FULL GCC LTO build #################\n"
         echo -e "\nCONFIG_LTO_GCC=y\n" >> out/.config
-	echo -e "\n# nCONFIG_HAVE_ARCH_PREL32_RELOCATIONS is not set\n" >> out/.config
    ;;
 
    *)
         echo -e "\n# CONFIG_LTO_GCC is not set\n" >> out/.config
-	echo -e "\nCONFIG_HAVE_ARCH_PREL32_RELOCATIONS=y\n" >> out/.config
    ;;
    esac
 fi
