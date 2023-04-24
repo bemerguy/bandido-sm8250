@@ -10,6 +10,8 @@
 #
 # Copyright (C) 1995-2001 by Russell King
 
+subdir-ccflags-y += -O2
+
 LDFLAGS_vmlinux	:=--no-undefined -X
 CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(TEXT_OFFSET)
 GZFLAGS		:=-9
@@ -66,8 +68,8 @@ ifeq ($(CONFIG_LD_IS_LLD), y)
 KBUILD_LDFLAGS  += -mllvm -mcpu=cortex-a55
 endif
 else
-KBUILD_CFLAGS   += -march=armv8.2-a -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
-KBUILD_AFLAGS   += -march=armv8.2-a -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
+KBUILD_CFLAGS   += -mcpu=cortex-a76.cortex-a55
+KBUILD_AFLAGS   += -mcpu=cortex-a76.cortex-a55
 endif
 endif
 
