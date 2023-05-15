@@ -2,7 +2,7 @@
 #
 # Makefile for some libs needed in the kernel.
 #
-subdir-ccflags-y += -O3
+subdir-ccflags-y += $(BOPTS)
 
 ifdef CONFIG_FUNCTION_TRACER
 ORIG_CFLAGS := $(KBUILD_CFLAGS)

@@ -3,7 +3,7 @@ ccflags-y := -Idrivers/gpu/drm/msm
 ccflags-y += -Idrivers/gpu/drm/msm/disp/dpu1
 ccflags-$(CONFIG_DRM_MSM_DSI) += -Idrivers/gpu/drm/msm/dsi
 
-ccflags-y += -O3
+ccflags-y += $(BOPTS)
 
 msm-y := \
 	hdmi/hdmi.o \

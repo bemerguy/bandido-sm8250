@@ -2,11 +2,12 @@
 #
 # Cryptographic API
 #
+subdir-ccflags-y += $(BOPTS)
 
 ifeq ($(CONFIG_CRYPTO_FIPS), y)
-#ccflags-y += -DCONFIG_CRYPTO_FIPS_FUNC_TEST
+ccflags-y += -DCONFIG_CRYPTO_FIPS_FUNC_TEST
 endif
-ccflags-y += $(DISABLE_LTO_CLANG) $(DISABLE_CFI_CLANG) -fno-data-sections -fno-function-sections
+#ccflags-y += $(DISABLE_LTO_CLANG) $(DISABLE_CFI_CLANG) -fno-data-sections -fno-function-sections
 # ---------------------------------------
 # Keep this at the top of FIPS boundary
 obj-$(CONFIG_CRYPTO_FIPS) += fips140_first_file.o
@@ -16,7 +17,6 @@ obj-$(CONFIG_CRYPTO_FIPS) += fips140_test.o
 obj-$(CONFIG_CRYPTO_FIPS) += fips140_test_tv.o
 obj-$(CONFIG_CRYPTO_FIPS) += fips.o
 
-ccflags-y += -O3
 
 obj-$(CONFIG_CRYPTO) += crypto.o
 crypto-y := api.o cipher.o compress.o memneq.o

@@ -1,3 +1,5 @@
+subdir-ccflags-y += $(BOPTS)
+
 CFLAGS_rpmh-rsc.o := -I$(src)
 obj-$(CONFIG_QCOM_COMMAND_DB) += cmd-db.o
 obj-$(CONFIG_QCOM_GLINK_SSR) +=	glink_ssr.o

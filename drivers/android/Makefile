@@ -1,3 +1,4 @@
+ccflags-y += $(BOPTS)
 ccflags-y += -I$(src)			# needed for trace events
 ccflags-y += -Wformat           # for checking printk bug
 
