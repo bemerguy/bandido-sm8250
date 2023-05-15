@@ -66,8 +66,9 @@ if [[ -f "$IMAGE" ]]; then
 	KERNELZIP="bandido-kernel-$(date +"%Y%m%d%H%M").zip"
 	cat out/arch/arm64/boot/dts/vendor/qcom/*.dtb > $DTB
 	rm AnyKernel3/zImage > /dev/null 2>&1
+	rm AnyKernel3/Image > /dev/null 2>&1
 	rm AnyKernel3/*.zip > /dev/null 2>&1
-	cp $IMAGE AnyKernel3/Image.gz
+	cp $IMAGE AnyKernel3/
 	cp $DTB AnyKernel3/dtb
 	cd AnyKernel3
 
