@@ -523,7 +523,7 @@ static unsigned long do_shrink_slab(struct shrink_control *shrinkctl,
 	}
 
 	total_scan += delta;
-	if (total_scan < 0) {
+	if (unlikely(total_scan < 0)) {
 		pr_err("shrink_slab: %pF negative objects to delete nr=%ld\n",
 		       shrinker->scan_objects, total_scan);
 		total_scan = freeable;
