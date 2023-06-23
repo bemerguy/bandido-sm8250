@@ -378,7 +378,7 @@ static inline bool list_add_leaf_cfs_rq(struct cfs_rq *cfs_rq)
 	struct rq *rq = rq_of(cfs_rq);
 	int cpu = cpu_of(rq);
 
-	if (cfs_rq->on_list)
+	if (unlikely(cfs_rq->on_list))
 		return rq->tmp_alone_branch == &rq->leaf_cfs_rq_list;
 
 	cfs_rq->on_list = 1;
@@ -793,7 +793,7 @@ int sched_proc_update_handler(struct ctl_table *table, int write,
  */
 static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 {
-	if (unlikely(se->load.weight != NICE_0_LOAD))
+	if (se->load.weight != NICE_0_LOAD)
 		delta = __calc_delta(delta, NICE_0_LOAD, &se->load);
 
 	return delta;
