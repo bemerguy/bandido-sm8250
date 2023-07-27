@@ -276,34 +276,6 @@ config ARCH_THREAD_STACK_ALLOCATOR
 config ARCH_WANTS_DYNAMIC_TASK_STRUCT
 	bool
 
-config ARCH_WANTS_NO_INSTR
-	bool
-	help
-	  An architecture should select this if the noinstr macro is being used on
-	  functions to denote that the toolchain should avoid instrumenting such
-	  functions and is required for correctness.
-
-config ARCH_32BIT_OFF_T
-	bool
-	depends on !64BIT
-	help
-	  All new 32-bit architectures should have 64-bit off_t type on
-	  userspace side which corresponds to the loff_t kernel type. This
-	  is the requirement for modern ABIs. Some existing architectures
-	  still support 32-bit off_t. This option is enabled for all such
-	  architectures explicitly.
-
-# Selected by 64 bit architectures which have a 32 bit f_tinode in struct ustat
-config ARCH_32BIT_USTAT_F_TINODE
-	bool
-
-config HAVE_ASM_MODVERSIONS
-	bool
-	help
-	  This symbol should be selected by an architecture if it provides
-	  <asm/asm-prototypes.h> to support the module versioning for symbols
-	  exported from assembly code.
-
 config HAVE_REGS_AND_STACK_ACCESS_API
 	bool
 	help
