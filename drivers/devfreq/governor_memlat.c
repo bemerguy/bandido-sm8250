@@ -110,7 +110,7 @@ static unsigned long core_to_dev_freq(struct memlat_node *node,
 	struct core_dev_map *map = hw->freq_map;
 	unsigned long freq = 0;
 
-	if (!map)
+	if (unlikely(!map))
 		goto out;
 
 	while (map->core_mhz && map->core_mhz < coref)
@@ -273,7 +273,7 @@ static int devfreq_memlat_get_freq(struct devfreq *df,
 	 * both scenarios. As a result, this block will cause a 0 vote during
 	 * suspend and a vote for df->prev_freq during resume.
 	 */
-	if (!node->mon_started) {
+	if (unlikely(!node->mon_started)) {
 		*freq = node->resume_freq;
 		return 0;
 	}
