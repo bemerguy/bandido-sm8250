@@ -192,7 +192,7 @@ static void update_counts(struct memlat_cpu_grp *cpu_grp)
 			common_evs[STALL_IDX].last_delta =
 				common_evs[CYC_IDX].last_delta;
 
-		if (delta != 0)
+		if (likely(delta != 0))
 			cpu_data->freq = common_evs[CYC_IDX].last_delta / delta;
 		else
 			cpu_data->freq = common_evs[CYC_IDX].last_delta;
@@ -212,7 +212,7 @@ static void update_counts(struct memlat_cpu_grp *cpu_grp)
 				cpu - cpumask_first(&mon->cpus);
 			read_event(&mon->miss_ev[mon_idx]);
 
-			if (mon->wb_ev_id && mon->access_ev_id) {
+			if (unlikely(mon->wb_ev_id && mon->access_ev_id)) {
 				read_event(&mon->wb_ev[mon_idx]);
 				read_event(&mon->access_ev[mon_idx]);
 			}
@@ -252,7 +252,7 @@ static unsigned long get_cnt(struct memlat_hwmon *hw)
 			devstats->mem_count = 1;
 		}
 
-		if (mon->access_ev_id && mon->wb_ev_id)
+		if (unlikely(mon->access_ev_id && mon->wb_ev_id))
 			devstats->wb_pct =
 				mult_frac(100, mon->wb_ev[mon_idx].last_delta,
 					  mon->access_ev[mon_idx].last_delta);
@@ -348,7 +348,7 @@ static void memlat_monitor_work(struct work_struct *work)
 	unsigned int i;
 
 	mutex_lock(&cpu_grp->mons_lock);
-	if (!cpu_grp->num_active_mons)
+	if (unlikely(!cpu_grp->num_active_mons))
 		goto unlock_out;
 	update_counts(cpu_grp);
 	for (i = 0; i < cpu_grp->num_mons; i++) {
@@ -356,13 +356,13 @@ static void memlat_monitor_work(struct work_struct *work)
 
 		mon = &cpu_grp->mons[i];
 
-		if (!mon->is_active)
+		if (unlikely(!mon->is_active))
 			continue;
 
 		df = mon->hw.df;
 		mutex_lock(&df->lock);
 		err = update_devfreq(df);
-		if (err)
+		if (unlikely(err))
 			dev_err(mon->hw.dev, "Memlat update failed: %d\n", err);
 		mutex_unlock(&df->lock);
 	}
