@@ -18,7 +18,7 @@ KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
 CPU=$(($(nproc) - 2))
 
 DATE_START=$(date +"%s")
-IMAGE="out/arch/arm64/boot/Image.gz-dtb"
+IMAGE="out/arch/arm64/boot/Image.gz"
 
 # remove a previous kernel image
 rm $IMAGE &> /dev/null
@@ -67,14 +67,13 @@ if [[ -f "$IMAGE" ]]; then
 		adb reboot recovery
 	fi
 	KERNELZIP="bandido-kernel-$(date +"%Y%m%d%H%M").zip"
-#	cat out/arch/arm64/boot/dts/vendor/qcom/*.dtb > $DTB
+	cat out/arch/arm64/boot/dts/vendor/qcom/*.dtb > AnyKernel3/dtb
 	rm AnyKernel3/*Image* > /dev/null 2>&1
 	rm AnyKernel3/*.zip > /dev/null 2>&1
 	cp $IMAGE AnyKernel3/
-#	cp $DTB AnyKernel3/dtb
 	cd AnyKernel3
 
-	zip -r9 $KERNELZIP .
+	zip -r9 $KERNELZIP . -x .git README.md *placeholder
 
 	DATE_END=$(date +"%s")
 	DIFF=$(($DATE_END - $DATE_START))
