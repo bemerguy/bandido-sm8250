@@ -79,7 +79,7 @@ static atomic_t rc_num_succ_flush_fs = ATOMIC_INIT(0);
 /* statistics end */
 
 /* rbincache data structures */
-#define MAX_RC_POOLS 32
+#define MAX_RC_POOLS 64
 
 /* One rbincache pool per filesystem mount instance */
 struct rc_pool {
