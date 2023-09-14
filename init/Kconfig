@@ -1624,7 +1624,7 @@ config MEMBARRIER
 
 config KALLSYMS
 	 bool "Load all symbols for debugging/ksymoops" if EXPERT
-	 default y
+	 default n
 	 help
 	   Say Y here to let the kernel print out symbolic crash information and
 	   symbolic stack backtraces. This increases the size of the kernel
