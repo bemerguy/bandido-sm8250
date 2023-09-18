@@ -15,6 +15,9 @@ $(obj)/sha256.o: $(srctree)/lib/sha256.c FORCE
 LDFLAGS_purgatory.ro := -e purgatory_start -r --no-undefined -nostdlib -z nodefaultlib
 targets += purgatory.ro
 
+# Sanitizer, etc. runtimes are unavailable and cannot be linked here.
+GCOV_PROFILE	:= n
+PGO_PROFILE	:= n
 KASAN_SANITIZE	:= n
 KCOV_INSTRUMENT := n
 
