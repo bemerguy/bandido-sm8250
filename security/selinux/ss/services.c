@@ -2149,6 +2149,7 @@ bad:
 	newc->hash = context_compute_hash(s);
 	pr_info("SELinux:  Context %s became invalid (unmapped).\n",
 		newc->str);
+	return 0;
 #else
 	return 0;
 #endif
@@ -3827,3 +3828,4 @@ int security_read_policy(struct selinux_state *state,
 	return 0;
 
 }
+
