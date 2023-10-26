@@ -27,7 +27,8 @@ static struct page *erofs_read_inode(struct inode *inode,
 	unsigned int ifmt;
 	int err;
 
-	vi->data_mapping_mode = __inode_data_mapping(advise);
+	blkaddr = erofs_blknr(inode_loc);
+	*ofs = erofs_blkoff(inode_loc);
 
 	erofs_dbg("%s, reading inode nid %llu at %u of blkaddr %u",
 		  __func__, vi->nid, *ofs, blkaddr);
