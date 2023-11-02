@@ -268,7 +268,7 @@ config RFS_ACCEL
 config XPS
 	bool
 	depends on SMP
-	default y
+#	default y
 
 config HWBM
        bool
