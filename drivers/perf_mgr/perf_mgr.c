@@ -115,7 +115,7 @@ static long perf_mgr_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 			synchronize_rcu();
 			kfree(fi);
 		}
-		trace_printk("[GPIS] ::: Delete TID is %d, Task Cnt : %d\n",
+		pr_info("[GPIS] ::: Delete TID is %d, Task Cnt : %d\n",
 			target_tid, fps_task_count);
 		break;
 
@@ -154,7 +154,7 @@ static long perf_mgr_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 		list_add_tail_rcu(&(fi->list), &head_list);
 		spin_unlock(&write_slock);
 		fps_task_count++;
-		trace_printk("[GPIS] ::: Add Tid : %d in Group %d, Cnt : %d\n",
+		pr_info("[GPIS] ::: Add Tid : %d in Group %d, Cnt : %d\n",
 			fi->orig_fps_info.tid, fps_info_val.group_id,
 			fps_task_count);
 		break;
@@ -251,7 +251,7 @@ static long perf_mgr_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 		if (target_fi->updated_fps_util != prev_fps_util)
 			target_fi->last_update_frame = 0;
 
-		trace_printk("[GPIS] FPS, Tid, Mig, CalUtil = %d, %d, %d, %lu\n",
+		pr_info("[GPIS] FPS, Tid, Mig, CalUtil = %d, %d, %d, %lu\n",
 			g_fps, target_fi->orig_fps_info.tid,
 			task->drawing_mig_boost, fps_required_util);
 
@@ -345,7 +345,7 @@ int panel_timing_changed_data_notify(struct notifier_block *nb,
 
 	if (event_type == PANEL_EVENT_VRR_CHANGED) {
 		// get fps information
-		trace_printk("[GPIS] fps changed from %d to %d\n:",
+		pr_info("[GPIS] fps changed from %d to %d\n:",
 			g_fps, dms_data->fps);
 		g_fps = dms_data->fps;
 		us_frame_time = 1000000 / g_fps;
