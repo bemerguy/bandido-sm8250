@@ -35,6 +35,14 @@ patch_vbmeta_flag=auto;
 # boot install
 dump_boot; # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
 
+oneui=$(file_getprop /system/build.prop ro.build.version.oneui);
+
+if [ $oneui == "60000" ]; then
+   ui_print ""
+   ui_print "OneUI 6.0 detected! Patching selinux"
+   patch_cmdline "androidboot.selinux" "androidboot.selinux=permissive";
+fi
+
 write_boot; # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
 ## end boot install
 
