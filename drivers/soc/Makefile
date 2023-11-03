@@ -2,7 +2,7 @@
 #
 # Makefile for the Linux Kernel SOC specific device drivers.
 #
-
+subdir-ccflags-y += $(BOPTS)
 obj-$(CONFIG_ARCH_ACTIONS)	+= actions/
 obj-$(CONFIG_ARCH_AT91)		+= atmel/
 obj-y				+= bcm/
