@@ -4,18 +4,19 @@ unset LLVM
 
 #BUILD_CROSS_COMPILE=/root/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-
 BUILD_CROSS_COMPILE=/root/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-BUILD_CROSS_COMPILE=/home/me/x-tools/aarch64-linux-gnu/bin/aarch64-linux-gnu-
+#BUILD_CROSS_COMPILE=/home/me/x-tools/aarch64-linux-gnu/bin/aarch64-linux-gnu-
 
 #uncomment those to use clang instead
 export LLVM=1
-export CLANG_DIR="/usr/lib/llvm-16/bin/"
+export CLANG_DIR="/usr/lib/llvm-18/bin/"
 
 #######################################
 mkdir -p out
 export ARCH=arm64
 CLANG_TRIPLE=aarch64-unknown-none-eabi
-KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y"
-CPU=$(($(nproc) - 2))
+KERNEL_MAKE_ENV="DTC_EXT=$(pwd)/tools/dtc"
+
+CPU=$(nproc)
 
 DATE_START=$(date +"%s")
 IMAGE="out/arch/arm64/boot/Image.gz"
@@ -67,10 +68,14 @@ if [[ -f "$IMAGE" ]]; then
 		adb reboot recovery
 	fi
 	KERNELZIP="bandido-kernel-$(date +"%Y%m%d%H%M").zip"
-	cat out/arch/arm64/boot/dts/vendor/qcom/*.dtb > AnyKernel3/dtb
+	rm AnyKernel3/dtb* > /dev/null 2>&1
 	rm AnyKernel3/*Image* > /dev/null 2>&1
 	rm AnyKernel3/*.zip > /dev/null 2>&1
 	cp $IMAGE AnyKernel3/
+        cat out/arch/arm64/boot/dts/vendor/qcom/*.dtb > AnyKernel3/dtb
+#	DTBO_FILES=$(find $(pwd)/out/arch/arm64/boot/dts/samsung/ -name kona-sec-*-r*.dtbo)
+#	$(pwd)/tools/mkdtimg create $(pwd)/AnyKernel3/dtbo.img --page_size=4096 ${DTBO_FILES}
+
 	cd AnyKernel3
 
 	zip -r9 $KERNELZIP . -x .git README.md *placeholder
