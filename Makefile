@@ -435,11 +435,12 @@ LINUXINCLUDE    := \
 		$(USERINCLUDE)
 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+KBUILD_CFLAGS   := -Wall -Wundef -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-		   -Werror=return-type -Wno-format-security \
-		   -std=gnu89 \
+		   -Werror=return-type -Wno-format-security -Wno-unused-variable -Wno-unused-function -Wno-return-type \
+		   -Wno-enum-conversion \
+		   -std=gnu99 \
 		   -pipe
 KBUILD_CFLAGS	+= -DPLATFORM_VERSION=11.0.0
 KBUILD_CPPFLAGS := -D__KERNEL__
@@ -510,9 +511,6 @@ GCC_TOOLCHAIN	:= $(realpath $(GCC_TOOLCHAIN_DIR)/..)
 endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
-endif
-ifneq ($(LLVM_IAS),1)
-CLANG_FLAGS	+= -no-integrated-as
 endif
 CLANG_FLAGS	+= $(call cc-option, -Wno-misleading-indentation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-bool-operation)
@@ -620,7 +618,7 @@ all: vmlinux
 CFLAGS_PGO_CLANG := -fprofile-generate
 export CFLAGS_PGO_CLANG
 
-CFLAGS_GCOV	:= -fprofile-arcs -fipa-bit-cp \
+CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage \
 	$(call cc-option,-fno-tree-loop-im) \
 	$(call cc-disable-warning,maybe-uninitialized,)
 export CFLAGS_GCOV
@@ -721,9 +719,10 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, array-compare)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address)
 
 ifeq ($(cc-name),clang)
-OFFLAGS		= -O3 -fno-stack-protector -ffast-math -finline-functions -funroll-loops -falign-functions
+OFFLAGS		= -O2 -ffast-math -finline-functions -funroll-loops -falign-functions
+BOPTS		= -O3
 else
-OFFLAGS		= -ffast-math -funroll-all-loops -falign-functions -falign-jumps -falign-labels -falign-loops \
+OFFLAGS		= -Os -ffast-math -funroll-all-loops -falign-functions -falign-jumps -falign-labels -falign-loops \
 		-fsingle-precision-constant -fira-hoist-pressure
 
 BOPTS		= -O2 -fmodulo-sched -fmodulo-sched-allow-regmoves -funswitch-loops -fsplit-loops \
@@ -737,8 +736,12 @@ PFLAGS		= --param=max-tail-merge-comparisons=20000 --param=max-gcse-memory=21474
                 --param=max-cse-insns=200000 --param=max-cselib-memory-locations=500000 --param=max-reload-search-insns=500000 \
                 --param=max-modulo-backtrack-attempts=500000 --param=max-hoist-depth=0 --param=max-pending-list-length=1000 \
                 --param=max-delay-slot-live-search=200000 --param=max-delay-slot-insn-search=200000 --param=inline-min-speedup=25 \
-                --param=l1-cache-line-size=64 --param=l1-cache-size=128 --param=l2-cache-size=1024
+                --param=l1-cache-line-size=64 --param=l1-cache-size=192 --param=l2-cache-size=512
+ifdef CONFIG_LTO_GCC
+LDFINAL         += -O2 $(OFFLAGS)
 endif
+endif
+
 # inline-min-speedup lower than 25 reduce speed, 30 reduces too
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
@@ -746,10 +749,7 @@ else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2
 else
-KBUILD_CFLAGS	+= -Os $(OFFLAGS) $(PFLAGS)
-ifdef CONFIG_LTO_GCC
-LDFINAL		+= -O2 $(OFFLAGS)
-endif
+KBUILD_CFLAGS	+= $(OFFLAGS) $(PFLAGS)
 endif
 endif
 
@@ -769,10 +769,15 @@ POLLY		+= -mllvm -polly \
 		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-vectorizer=stripmine \
 		   -mllvm -polly-invariant-load-hoisting
-KBUILD_CFLAGS 	+= $(POLLY)
+KBUILD_CFLAGS   += $(POLLY)
 KBUILD_LDFLAGS 	+= $(POLLY)
-KBUILD_CFLAGS 	+= -mllvm -inline-threshold=125 #225
-KBUILD_CFLAGS 	+= -mllvm -inlinehint-threshold=225 #325
+#KBUILD_CFLAGS	+= -fprofile-use=vmlinux.profdata
+# -fno-profile-sample-accurate
+#KBUILD_LDFLAGS	+= --lto-cs-profile-file=vmlinux.profdata
+#-fprofile-use=vmlinux.profdata
+# -fno-profile-sample-accurate
+#KBUILD_CFLAGS 	+= -mllvm -inline-threshold=125 #225
+#KBUILD_CFLAGS 	+= -mllvm -inlinehint-threshold=225 #325
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
