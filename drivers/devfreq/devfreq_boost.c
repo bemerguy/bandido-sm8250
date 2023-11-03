@@ -307,14 +307,14 @@ static int __init devfreq_boost_init(void)
 			goto stop_kthreads;
 		}
 	}
-
+#if 0
 	devfreq_boost_input_handler.private = d;
 	ret = input_register_handler(&devfreq_boost_input_handler);
 	if (ret) {
 		pr_err("Failed to register input handler, err: %d\n", ret);
 		goto stop_kthreads;
 	}
-
+#endif
 	d->msm_drm_notif.notifier_call = msm_drm_notifier_cb;
 	d->msm_drm_notif.priority = INT_MAX;
 	ret = msm_drm_register_client(&d->msm_drm_notif);
