@@ -1161,8 +1161,8 @@ static void cluster_prepare(struct lpm_cluster *cluster,
 	raw_spin_unlock(&cluster->sync_lock);
 	return;
 failed:
-	spin_unlock(&cluster->sync_lock);
-	if (!IS_ERR_OR_NULL(cluster->stats))
+	raw_spin_unlock(&cluster->sync_lock);
+	if (IS_ENABLED(CONFIG_MSM_IDLE_STATS))
 		cluster->stats->sleep_time = 0;
 }
 
