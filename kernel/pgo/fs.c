@@ -408,7 +408,7 @@ static int __init pgo_init(void)
 
 	sysfs_inited = true;
 
-	schedule_delayed_work(&prof_reset_wq, msecs_to_jiffies(500));
+	schedule_delayed_work(&prof_reset_wq, msecs_to_jiffies(120000));
 
 	return 0;
 
