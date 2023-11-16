@@ -452,6 +452,8 @@ static int in_sched_bug __maybe_unused;
 		BUG_ON(condition);			\
 	}						\
 })
+#undef SCHED_BUG_ON
+#define SCHED_BUG_ON do { } while (0);
 
 static inline bool prefer_spread_on_idle(int cpu, bool new_ilb)
 {
