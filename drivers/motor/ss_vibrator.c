@@ -148,8 +148,8 @@ char boost_power_on(struct ss_vib *vib, char requester, char onoff)
 			gpio_direction_output(1020, 0);
 	}
 
-	pr_info("%s, request[%s][%s] motor[%d], hrm[%d]\n", __func__, requester ? "HRM":"MOTOR",
-		 onoff ? "ON":"OFF", motor_on, hrm_on);
+/*	pr_info("%s, request[%s][%s] motor[%d], hrm[%d]\n", __func__, requester ? "HRM":"MOTOR",
+		 onoff ? "ON":"OFF", motor_on, hrm_on);*/
 	return (motor_on || hrm_on);
 }
 EXPORT_SYMBOL(boost_power_on);
@@ -232,7 +232,7 @@ void vibe_set_freq(struct ss_vib *vib, int set_freq)
 			motor_strength = vib->strength_default;
 	}
 
-	pr_info("[VIB]: %s current temp: %d, motor_strength: %d\n", __func__, vib_get_temperature(), motor_strength);
+//	pr_info("[VIB]: %s current temp: %d, motor_strength: %d\n", __func__, vib_get_temperature(), motor_strength);
 
 	g_nlra_gp_clk_d = g_nlra_gp_clk_n / 2;
 	g_nlra_gp_clk_pwm_mul = motor_strength;
@@ -330,7 +330,7 @@ static void set_vibrator(struct ss_vib *vib)
 {
 	int ret;
 
-	pr_info("[VIB]: %s, value[%d]\n", __func__, vib->state);
+//	pr_info("[VIB]: %s, value[%d]\n", __func__, vib->state);
 	if (vib->state) {
 		wake_lock(&vib_wake_lock);
 		pm_qos_update_request(&pm_qos_req, PM_QOS_NONIDLE_VALUE);
@@ -390,7 +390,7 @@ static void set_vibrator(struct ss_vib *vib)
 		wake_unlock(&vib_wake_lock);
 		pm_qos_update_request(&pm_qos_req, PM_QOS_DEFAULT_VALUE);
 	}
-	pr_info("[VIB]: %s, vibrator control finish value[%d]\n", __func__, vib->state);
+//	pr_info("[VIB]: %s, vibrator control finish value[%d]\n", __func__, vib->state);
 }
 
 static void vibrator_enable(struct ss_vib *vib, int value)
@@ -400,7 +400,7 @@ static void vibrator_enable(struct ss_vib *vib, int value)
 	hrtimer_cancel(&vib->vib_timer);
 
 	if (value == 0) {
-		pr_info("[VIB]: OFF\n");
+//		pr_info("[VIB]: OFF\n");
 		vib->state = 0;
 		vib->timevalue = 0;
 
@@ -419,13 +419,13 @@ static void vibrator_enable(struct ss_vib *vib, int value)
 				vibe_set_intensity(vib->haptic_eng[0].intensity);
 				vib->timevalue = vib->haptic_eng[0].time;
 				vib->intensity = vib->haptic_eng[0].intensity;
-				pr_info("[VIB] packet enabled");
+//				pr_info("[VIB] packet enabled");
 			}
-			pr_info("[VIB]: ON, Duration : %d msec, intensity : %d, freq : %d strength : %d od : %d\n",
-				vib->timevalue, vib->intensity, vib->freq, motor_strength, vib->f_overdrive_en);
+/*			pr_info("[VIB]: ON, Duration : %d msec, intensity : %d, freq : %d strength : %d od : %d\n",
+				vib->timevalue, vib->intensity, vib->freq, motor_strength, vib->f_overdrive_en);*/
 		} else {
-			pr_info("[VIB]: ON, Duration : %d msec, intensity : %d, strength : %d od : %d\n", 
-				vib->timevalue, vib->intensity, motor_strength, vib->f_overdrive_en);
+/*			pr_info("[VIB]: ON, Duration : %d msec, intensity : %d, strength : %d od : %d\n", 
+				vib->timevalue, vib->intensity, motor_strength, vib->f_overdrive_en);*/
 		}
 	}
 
@@ -458,9 +458,9 @@ static void ss_haptic_engine_update(struct work_struct *work)
 	vibe_set_intensity(vib->haptic_eng[vib->packet_cnt].intensity);
 	vib->intensity = vib->haptic_eng[vib->packet_cnt].intensity;
 
-	pr_info("[VIB] %s time[%d] intensity[%d] freq[%d](m=%d,n=%d) od[%d]\n",	__func__,
+/*	pr_info("[VIB] %s time[%d] intensity[%d] freq[%d](m=%d,n=%d) od[%d]\n",	__func__,
 		vib->timevalue, vib->intensity, vib->freq,
-		g_nlra_gp_clk_m, g_nlra_gp_clk_n, vib->f_overdrive_en);
+		g_nlra_gp_clk_m, g_nlra_gp_clk_n, vib->f_overdrive_en);*/
 }
 
 static enum hrtimer_restart vibrator_timer_func(struct hrtimer *timer)
@@ -496,7 +496,7 @@ static int ss_vibrator_suspend(struct device *dev)
 {
 	struct ss_vib *vib = dev_get_drvdata(dev);
 
-	pr_info("[VIB]: %s\n", __func__);
+//	pr_info("[VIB]: %s\n", __func__);
 
 	hrtimer_cancel(&vib->vib_timer);
 	cancel_work_sync(&vib->work);
@@ -511,7 +511,7 @@ static int ss_vibrator_resume(struct device *dev)
 {
 	struct ss_vib *vib = dev_get_drvdata(dev);
 
-	pr_info("[VIB]: %s\n", __func__);
+//	pr_info("[VIB]: %s\n", __func__);
 	max778xx_haptic_en(vib, true);
 
 	return 0;
