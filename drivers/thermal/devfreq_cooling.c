@@ -578,6 +578,9 @@ of_devfreq_cooling_register_power(struct device_node *np, struct devfreq *df,
 	dfc->cooling_min_state = dfc->freq_table_size - 1;
 	snprintf(dev_name, sizeof(dev_name), "thermal-devfreq-%d", dfc->id);
 
+	pr_info("Bandido setting %s as (device_node name: %s type: %s) (devfreq name: %s)\n",
+		dev_name, np->name, np->type, df->governor_name);
+
 	cdev = thermal_of_cooling_device_register(np, dev_name, dfc,
 						  &devfreq_cooling_ops);
 	if (IS_ERR(cdev)) {

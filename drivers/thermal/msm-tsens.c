@@ -333,7 +333,7 @@ static void __ref ts_print(struct work_struct *work)
 		added += ret;
 	}
 
-	pr_info("%s\n", buffer);
+	pr_info("Bandido %s\n", buffer);
 
 	schedule_delayed_work(&ts_print_work, HZ * 5);
 }
