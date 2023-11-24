@@ -349,7 +349,8 @@ static int push_file_event_bunch(struct task_struct *task, struct file *file,
 
 		context->tint = TASK_INTEGRITY(task);
 
-		list_add_tail(&five_file->list, &TASK_INTEGRITY(task)->events.list);
+		list_add_tail(&five_file->list,
+			      &TASK_INTEGRITY(task)->events.list);
 		spin_unlock(&TASK_INTEGRITY(task)->list_lock);
 		INIT_WORK(&context->data_work, work_handler);
 		rc = queue_work(g_five_workqueue, &context->data_work) ? 0 : 1;
@@ -362,7 +363,8 @@ static int push_file_event_bunch(struct task_struct *task, struct file *file,
 			list_cut_tail(&TASK_INTEGRITY(task)->events.list,
 					&dead_list);
 		}
-		list_add_tail(&five_file->list, &TASK_INTEGRITY(task)->events.list);
+		list_add_tail(&five_file->list,
+			      &TASK_INTEGRITY(task)->events.list);
 		spin_unlock(&TASK_INTEGRITY(task)->list_lock);
 		free_files_list(&dead_list);
 		kfree(context);

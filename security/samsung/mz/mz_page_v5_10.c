@@ -181,6 +181,7 @@ MzResult mz_migrate_and_pin(struct page *target_page, unsigned long va, uint8_t 
 	//pin
 	mz_ret = mz_get_user_pages(task, mm, va, &(new_page[0]), 0, buf);
 	if (mz_ret != MZ_SUCCESS) {
+		if(new_page[0] != NULL)
 		put_page(new_page[0]);
 		goto out_pfns;
 	}
