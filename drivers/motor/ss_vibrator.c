@@ -978,7 +978,7 @@ static void regulator_power_onoff(struct ss_vib *vib, int onoff)
 				pr_info("enable ldo failed, rc=%d\n", ret);
 				return;
 			}
-			pr_info("[VIB]: power_on now\n");
+//			pr_info("[VIB]: power_on now\n");
 		}
 	} else {
 		if (regulator_is_enabled(reg_ldo)) {
@@ -991,7 +991,7 @@ static void regulator_power_onoff(struct ss_vib *vib, int onoff)
 				pr_info("disable ldo failed, rc=%d\n", ret);
 				return;
 			}
-			pr_info("[VIB]: power_off now\n");
+//			pr_info("[VIB]: power_off now\n");
 		} else {
 			pr_info("[VIB]: power_off already\n");
 		}
