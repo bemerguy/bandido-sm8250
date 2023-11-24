@@ -4,7 +4,7 @@
 
 config INPUT_SEC_INPUT
 	tristate "Support for SEC input layer"
-	default y
+	default n
 
 config SEC_DEBUG_TSP_LOG
 	tristate "Support for tsp_msg"
