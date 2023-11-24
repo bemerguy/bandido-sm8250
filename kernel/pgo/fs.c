@@ -273,6 +273,7 @@ static int prf_open(struct inode *inode, struct file *file)
 	/* Get initial buffer size. */
 	flags = prf_lock();
 	data->size = prf_buffer_size();
+	pr_info("Bandido prf_buffer_size = %lu", data->size);
 	prf_unlock(flags);
 
 	do {
@@ -408,7 +409,7 @@ static int __init pgo_init(void)
 
 	sysfs_inited = true;
 
-	schedule_delayed_work(&prof_reset_wq, msecs_to_jiffies(120000));
+	schedule_delayed_work(&prof_reset_wq, msecs_to_jiffies(140000));
 
 	return 0;
 
