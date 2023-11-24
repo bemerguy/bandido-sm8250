@@ -10265,7 +10265,7 @@ static int sec_battery_prepare(struct device *dev)
 	struct sec_battery_info *battery
 		= dev_get_drvdata(dev);
 
-	dev_info(battery->dev, "%s: Start\n", __func__);
+//	dev_info(battery->dev, "%s: Start\n", __func__);
 
 	switch (battery->pdata->polling_type) {
 	case SEC_BATTERY_MONITOR_WORKQUEUE:
@@ -10294,7 +10294,7 @@ static int sec_battery_prepare(struct device *dev)
 		SEC_BATTERY_MONITOR_WORKQUEUE)
 		cancel_delayed_work(&battery->polling_work);
 
-	dev_info(battery->dev, "%s: End\n", __func__);
+//	dev_info(battery->dev, "%s: End\n", __func__);
 
 	return 0;
 }
@@ -10314,7 +10314,7 @@ static void sec_battery_complete(struct device *dev)
 	struct sec_battery_info *battery
 		= dev_get_drvdata(dev);
 
-	dev_info(battery->dev, "%s: Start\n", __func__);
+//	dev_info(battery->dev, "%s: Start\n", __func__);
 
 	/* cancel current alarm and reset after monitor work */
 	if (battery->pdata->polling_type == SEC_BATTERY_MONITOR_ALARM)
@@ -10324,7 +10324,7 @@ static void sec_battery_complete(struct device *dev)
 	queue_delayed_work(battery->monitor_wqueue,
 		&battery->monitor_work, 0);
 
-	dev_info(battery->dev, "%s: End\n", __func__);
+//	dev_info(battery->dev, "%s: End\n", __func__);
 
 	return;
 }

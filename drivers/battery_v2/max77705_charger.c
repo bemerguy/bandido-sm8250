@@ -127,7 +127,7 @@ static void max77705_test_read(struct max77705_charger_data *charger)
 		max77705_read_reg(charger->i2c, addr, &data);
 		sprintf(str + strlen(str), "[0x%02x]0x%02x, ", addr, data);
 	}
-	pr_info("max77705 : %s\n", str);
+//	pr_info("max77705 : %s\n", str);
 }
 
 static int max77705_get_autoibus(struct max77705_charger_data *charger)
@@ -180,7 +180,7 @@ static int max77705_get_charger_state(struct max77705_charger_data *charger)
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_DETAILS_01, &reg_data);
 
-	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
+//	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
 
 	reg_data &= 0x0f;
 
@@ -229,7 +229,7 @@ static bool max77705_chg_get_wdtmr_status(struct max77705_charger_data *charger)
 
 static int max77705_chg_set_wdtmr_en(struct max77705_charger_data *charger, bool enable)
 {
-	pr_info("%s: WDT en = %d\n", __func__, enable);
+//	pr_info("%s: WDT en = %d\n", __func__, enable);
 
 	if (enable) {
 		max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_00,
@@ -244,7 +244,7 @@ static int max77705_chg_set_wdtmr_en(struct max77705_charger_data *charger, bool
 
 static int max77705_chg_set_wdtmr_kick(struct max77705_charger_data *charger)
 {
-	pr_info("%s: WDT Kick\n", __func__);
+//	pr_info("%s: WDT Kick\n", __func__);
 
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_06,
 			    (MAX77705_WDTCLR << CHG_CNFG_06_WDTCLR_SHIFT), CHG_CNFG_06_WDTCLR_MASK);
@@ -257,7 +257,7 @@ static bool max77705_is_constant_current(struct max77705_charger_data *charger)
 	u8 reg_data;
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_DETAILS_01, &reg_data);
-	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
+//	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
 	reg_data &= 0x0f;
 
 	if (reg_data == 0x01)
@@ -290,7 +290,7 @@ static void max77705_set_float_voltage(struct max77705_charger_data *charger,
 			    CHG_CNFG_04_CHG_CV_PRM_MASK);
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_04, &reg_data);
-	pr_info("%s: battery cv voltage 0x%x\n", __func__, reg_data);
+//	pr_info("%s: battery cv voltage 0x%x\n", __func__, reg_data);
 }
 
 static int max77705_get_float_voltage(struct max77705_charger_data *charger)
@@ -337,7 +337,7 @@ static int max77705_get_charging_health(struct max77705_charger_data *charger)
 			max77705_set_switching_frequency(charger, MAX77705_CHG_FSW_1_5MHz);
 	}
 
-	pr_info("%s: reg_data(0x%x)\n", __func__, reg_data);
+//	pr_info("%s: reg_data(0x%x)\n", __func__, reg_data);
 	switch (reg_data) {
 	case 0x00:
 		pr_info("%s: No battery and the charger is suspended\n",
@@ -396,12 +396,12 @@ static int max77705_get_charging_health(struct max77705_charger_data *charger)
 	psy_do_property("max77705-fuelgauge", get,
 		POWER_SUPPLY_EXT_PROP_MEASURE_INPUT, val_vbyp);
 
-	pr_info("%s: vbus_state: 0x%x, chg_dtls: 0x%x, iin: %dmA, vbyp: %dmV, abnormal: %s\n",
-		__func__, vbus_state, chg_dtls, val_iin.intval, val_vbyp.intval, (abnormal_status ? "true" : "false"));
+//	pr_info("%s: vbus_state: 0x%x, chg_dtls: 0x%x, iin: %dmA, vbyp: %dmV, abnormal: %s\n",
+//		__func__, vbus_state, chg_dtls, val_iin.intval, val_vbyp.intval, (abnormal_status ? "true" : "false"));
 
 	/*  OVP is higher priority */
 	if (vbus_state == 0x02) {	/*  CHGIN_OVLO */
-		pr_info("%s: vbus ovp\n", __func__);
+//		pr_info("%s: vbus ovp\n", __func__);
 		state = POWER_SUPPLY_HEALTH_OVERVOLTAGE;
 		if (is_wireless_type(charger->cable_type) || is_wcin_port(charger)) {
 			retry_cnt = 0;
@@ -461,8 +461,8 @@ static int max77705_get_charge_current(struct max77705_charger_data *charger)
 
 	get_current = reg_data <= 0x2 ? 100 : reg_data * 50;
 
-	pr_info("%s: reg:(0x%x), charging_current:(%d)\n",
-			__func__, reg_data, get_current);
+//	pr_info("%s: reg:(0x%x), charging_current:(%d)\n",
+//			__func__, reg_data, get_current);
 	return get_current;
 }
 
@@ -498,8 +498,8 @@ static int max77705_get_input_current_type(struct max77705_charger_data
 			get_current = (reg_data + 0x01) * 25;
 	}
 
-	pr_info("%s: reg:(0x%x), charging_current:(%d)\n",
-			__func__, reg_data, get_current);
+//	pr_info("%s: reg:(0x%x), charging_current:(%d)\n",
+//			__func__, reg_data, get_current);
 
 	return get_current;
 }
@@ -544,8 +544,8 @@ static void reduce_input_current(struct max77705_charger_data *charger, int cur)
 
 	set_value |= (input_current / input_curr_limit_step) - 0x01;
 	max77705_update_reg(charger->i2c, set_reg, set_value, set_mask);
-	pr_info("%s: reg:(0x%x), val(0x%x), input current(%d)\n",
-		__func__, set_reg, set_value, input_current);
+//	pr_info("%s: reg:(0x%x), val(0x%x), input current(%d)\n",
+//		__func__, set_reg, set_value, input_current);
 	charger->input_current = max77705_get_input_current(charger);
 	charger->aicl_on = true;
 }
@@ -557,12 +557,12 @@ static bool max77705_check_battery(struct max77705_charger_data *charger)
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_INT_OK, &reg_data);
 
-	pr_info("%s : CHG_INT_OK(0x%x)\n", __func__, reg_data);
+//	pr_info("%s : CHG_INT_OK(0x%x)\n", __func__, reg_data);
 
 	max77705_read_reg(charger->i2c,
 			  MAX77705_CHG_REG_DETAILS_00, &reg_data2);
 
-	pr_info("%s : CHG_DETAILS00(0x%x)\n", __func__, reg_data2);
+//	pr_info("%s : CHG_DETAILS00(0x%x)\n", __func__, reg_data2);
 
 	if ((reg_data & MAX77705_BATP_OK) || !(reg_data2 & MAX77705_BATP_DTLS))
 		return true;
@@ -580,8 +580,8 @@ static void max77705_check_cnfg12_reg(struct max77705_charger_data *charger)
 		valid_cnfg12 = (is_wireless_type(charger->cable_type) || is_wcin_port(charger)) ? MAX77705_CHG_WCINSEL :
 			(MAX77705_CHG_WCINSEL | (1 << CHG_CNFG_12_CHGINSEL_SHIFT));
 		max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_12, &reg_data);
-		pr_info("%s: valid_data = 0x%2x, reg_data = 0x%2x\n",
-			__func__, valid_cnfg12, reg_data);
+//		pr_info("%s: valid_data = 0x%2x, reg_data = 0x%2x\n",
+//			__func__, valid_cnfg12, reg_data);
 		if (valid_cnfg12 != reg_data) {
 			max77705_test_read(charger);
 			is_valid = false;
@@ -605,7 +605,7 @@ static void max77705_change_charge_path(struct max77705_charger_data *charger,
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_12,
 			    cnfg12, CHG_CNFG_12_CHGINSEL_MASK);
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_12, &cnfg12);
-	pr_info("%s : CHG_CNFG_12(0x%02x)\n", __func__, cnfg12);
+//	pr_info("%s : CHG_CNFG_12(0x%02x)\n", __func__, cnfg12);
 
 	max77705_check_cnfg12_reg(charger);
 }
@@ -623,7 +623,7 @@ static void max77705_set_ship_mode(struct max77705_charger_data *charger,
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_07,
 			    cnfg07, CHG_CNFG_07_REG_SHIPMODE_MASK);
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_07, &cnfg07);
-	pr_info("%s : CHG_CNFG_07(0x%02x)\n", __func__, cnfg07);
+//	pr_info("%s : CHG_CNFG_07(0x%02x)\n", __func__, cnfg07);
 }
 
 static void max77705_set_auto_ship_mode(struct max77705_charger_data *charger,
@@ -640,7 +640,7 @@ static void max77705_set_auto_ship_mode(struct max77705_charger_data *charger,
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_03,
 			    cnfg03, CHG_CNFG_03_REG_AUTO_SHIPMODE_MASK);
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_03, &cnfg03);
-	pr_info("%s : CHG_CNFG_03(0x%02x)\n", __func__, cnfg03);
+//	pr_info("%s : CHG_CNFG_03(0x%02x)\n", __func__, cnfg03);
 }
 
 static void max77705_set_input_current(struct max77705_charger_data *charger,
@@ -682,8 +682,8 @@ static void max77705_set_input_current(struct max77705_charger_data *charger,
 		max77705_set_fw_noautoibus(MAX77705_AUTOIBUS_AT_OFF);
 
 	mutex_unlock(&charger->charger_mutex);
-	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
-		__func__, set_reg, reg_data, input_current);
+//	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
+//		__func__, set_reg, reg_data, input_current);
 }
 
 static void max77705_set_charge_current(struct max77705_charger_data *charger,
@@ -710,9 +710,9 @@ static void max77705_set_charge_current(struct max77705_charger_data *charger,
 		max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_02, reg_data, set_mask);
 	}
 
-	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
-		__func__, MAX77705_CHG_REG_CNFG_02,
-		reg_data, fast_charging_current);
+//	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
+//		__func__, MAX77705_CHG_REG_CNFG_02,
+//		reg_data, fast_charging_current);
 }
 
 static void max77705_set_wireless_input_current(struct max77705_charger_data
@@ -755,8 +755,8 @@ static void max77705_set_topoff_current(struct max77705_charger_data *charger,
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_03,
 			    reg_data, CHG_CNFG_03_TO_ITH_MASK);
 
-	pr_info("%s: reg_data(0x%02x), topoff(%dmA)\n",
-		__func__, reg_data, termination_current);
+//	pr_info("%s: reg_data(0x%02x), topoff(%dmA)\n",
+//		__func__, reg_data, termination_current);
 }
 
 static void max77705_set_topoff_time(struct max77705_charger_data *charger,
@@ -768,8 +768,8 @@ static void max77705_set_topoff_time(struct max77705_charger_data *charger,
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_03,
 		reg_data, CHG_CNFG_03_TO_TIME_MASK);
 
-	pr_info("%s: reg_data(0x%02x), topoff_time(%dmin)\n",
-		__func__, reg_data, topoff_time);
+//	pr_info("%s: reg_data(0x%02x), topoff_time(%dmin)\n",
+//		__func__, reg_data, topoff_time);
 }
 
 static void max77705_set_switching_frequency(struct max77705_charger_data *charger, int frequency)
@@ -783,12 +783,12 @@ static void max77705_set_switching_frequency(struct max77705_charger_data *charg
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_08, &cnfg_08);
 
 	charger->switching_freq = frequency;
-	pr_info("%s : CHG_CNFG_08(0x%02x)\n", __func__, cnfg_08);	
+//	pr_info("%s : CHG_CNFG_08(0x%02x)\n", __func__, cnfg_08);	
 }
 
 static void max77705_set_skipmode(struct max77705_charger_data *charger, int enable)
 {
-	pr_info("%s : en(%d)\n", __func__, enable);
+//	pr_info("%s : en(%d)\n", __func__, enable);
 	if (enable) {
 		/* Auto skip mode */
 		max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_12,
@@ -820,9 +820,9 @@ static void max77705_set_b2sovrc(struct max77705_charger_data *charger, u32 ocp_
 		CHG_CNFG_06_B2SOVRC_DTC_MASK);
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_05, &reg_data);
-	pr_info("%s : CHG_CNFG_05(0x%02x)\n", __func__, reg_data);
+//	pr_info("%s : CHG_CNFG_05(0x%02x)\n", __func__, reg_data);
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_06, &reg_data);
-	pr_info("%s : CHG_CNFG_06(0x%02x)\n", __func__, reg_data);
+//	pr_info("%s : CHG_CNFG_06(0x%02x)\n", __func__, reg_data);
 
 	return;
 }
@@ -982,7 +982,7 @@ static void max77705_charger_initialize(struct max77705_charger_data *charger)
 	u8 reg_data;
 	int jig_gpio;
 
-	pr_info("%s\n", __func__);
+//	pr_info("%s\n", __func__);
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_00, &reg_data);
 	charger->cnfg00_mode = (reg_data & CHG_CNFG_00_MODE_MASK);
@@ -1075,7 +1075,7 @@ static void max77705_charger_initialize(struct max77705_charger_data *charger)
 	else
 		jig_gpio = gpio_get_value(charger->jig_gpio);
 
-	pr_info("%s jig_gpio = %d\n", __func__, jig_gpio);
+//	pr_info("%s jig_gpio = %d\n", __func__, jig_gpio);
 
 #if defined(CONFIG_SEC_FACTORY)
 	if (factory_mode) {
@@ -1145,8 +1145,8 @@ static void max77705_set_sysovlo(struct max77705_charger_data *charger,
 
 	max77705_read_reg(charger->pmic_i2c, MAX77705_PMIC_REG_SYSTEM_INT_MASK,
 			  &reg_data);
-	pr_info("%s: check topsys irq mask(0x%x), enable(%d)\n", __func__,
-		reg_data, enable);
+//	pr_info("%s: check topsys irq mask(0x%x), enable(%d)\n", __func__,
+//		reg_data, enable);
 }
 
 static void max77705_chg_monitor_work(struct max77705_charger_data *charger)
@@ -1159,8 +1159,8 @@ static void max77705_chg_monitor_work(struct max77705_charger_data *charger)
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_05, &reg_data);
 	reg_b2sovrc = (reg_data & CHG_CNFG_05_REG_B2SOVRC_MASK) >> CHG_CNFG_05_REG_B2SOVRC_SHIFT;
 
-	pr_info("%s: [CHG] MODE(0x%x), B2SOVRC(0x%x), otg_on(%d)\n",
-		__func__, reg_mode, reg_b2sovrc, charger->otg_on);
+//	pr_info("%s: [CHG] MODE(0x%x), B2SOVRC(0x%x), otg_on(%d)\n",
+//		__func__, reg_mode, reg_b2sovrc, charger->otg_on);
 }
 
 static int max77705_chg_create_attrs(struct device *dev)
@@ -1577,7 +1577,7 @@ static void max77705_chg_set_mode_state(struct max77705_charger_data *charger, u
 #endif
 
 	mutex_lock(&charger->mode_mutex);
-	pr_info("%s: current_mode(0x%x), state(%d)\n", __func__, charger->cnfg00_mode, state);
+//	pr_info("%s: current_mode(0x%x), state(%d)\n", __func__, charger->cnfg00_mode, state);
 
 	switch(charger->cnfg00_mode)
 	{
@@ -1712,7 +1712,7 @@ static void max77705_chg_set_mode_state(struct max77705_charger_data *charger, u
 			(0 << CHG_CNFG_12_WCINSEL_SHIFT), CHG_CNFG_12_WCINSEL_MASK);
 	}
 
-	pr_info("%s: current_mode(0x%x)\n", __func__, charger->cnfg00_mode);
+//	pr_info("%s: current_mode(0x%x)\n", __func__, charger->cnfg00_mode);
 	max77705_update_reg(charger->i2c, MAX77705_CHG_REG_CNFG_00,
 				    charger->cnfg00_mode,
 				    CHG_CNFG_00_MODE_MASK);
@@ -1727,7 +1727,7 @@ static void max77705_chg_set_mode_state(struct max77705_charger_data *charger, u
 
 	max77705_read_reg(charger->i2c, MAX77705_CHG_REG_CNFG_00, &reg);
 	reg &= 0xF;
-	pr_info("%s: CNFG_00 (0x%x)\n", __func__, reg);
+//	pr_info("%s: CNFG_00 (0x%x)\n", __func__, reg);
 	mutex_unlock(&charger->mode_mutex);
 }
 
