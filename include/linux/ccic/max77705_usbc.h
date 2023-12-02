@@ -368,7 +368,8 @@ void factory_execute_monitor(int);
 
 #define DEBUG_MAX77705
 #ifdef DEBUG_MAX77705
-static inline void msg_maxim(const char *format, ...) {}
+#define msg_maxim(format, args...) \
+		pr_info("max77705: %s: " format "\n", __func__, ## args)
 #else
 #define msg_maxim(format, args...)
 #endif /* DEBUG_MAX77766*/

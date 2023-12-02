@@ -5674,7 +5674,7 @@ static void set_normal_br_values(struct samsung_display_driver_data *vdd)
 static void set_hbm_br_values(struct samsung_display_driver_data *vdd)
 {
 	int from, end;
-	int left, right, p = 0;
+	int left, right, p;
 	int loop = 0;
 	struct candela_map_table *table;
 
