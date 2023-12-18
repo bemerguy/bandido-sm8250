@@ -1072,8 +1072,6 @@ static ssize_t pmqos_active_latency_store(struct device *dev,
 	struct kgsl_device *device = dev_get_drvdata(dev);
 	int ret;
 
-	return count;
-
 	ret = kgsl_sysfs_store(buf, &val);
 	if (ret)
 		return ret;
