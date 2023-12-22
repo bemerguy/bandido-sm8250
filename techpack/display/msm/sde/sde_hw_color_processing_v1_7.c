@@ -670,6 +670,7 @@ void sde_setup_dspp_pcc_v1_7(struct sde_hw_dspp *ctx, void *cfg)
 {
 	struct sde_hw_cp_cfg *hw_cfg = cfg;
 	struct drm_msm_pcc *pcc;
+	void  __iomem *base;
 
 	if (!hw_cfg  || (hw_cfg->len != sizeof(*pcc)  && hw_cfg->payload)) {
 		DRM_ERROR(
@@ -678,6 +679,7 @@ void sde_setup_dspp_pcc_v1_7(struct sde_hw_dspp *ctx, void *cfg)
 			   ((hw_cfg) ? hw_cfg->len : 0), sizeof(*pcc));
 		return;
 	}
+	base = ctx->hw.base_off + ctx->cap->base;
 
 	/* Turn off feature */
 	if (!hw_cfg->payload) {
