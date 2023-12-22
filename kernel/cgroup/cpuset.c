@@ -1784,19 +1784,19 @@ static ssize_t cpuset_write_resmask_wrapper(struct kernfs_open_file *of,
 		char *c_cpus;
 	};
 	struct c_data c_targets[6] = {
-		/* Silver only cpusets go first */ /* for s20fe 0 1 2 3  4 5 6  7 */
-		{ "foreground",			"4-6"	},//0-2,4-7
-		{ "background",			"2,3"	},//0-1
-		{ "system-background",		"1,2"	},//0-2
-		{ "restricted",			"0"	},//0-7
-		{ "top-app",			"4-7"	},//0-7
-		{ "camera-daemon",		"7"	}};//0-7
+		/* Silver only cpusets go first */
+		{ "foreground",			"0-5"},//0-2,4-7
+		{ "background",			"0-2"},//0-1
+		{ "system-background",	"0-3"},//0-2
+		{ "restricted",			"0-5"},//0-7
+		{ "top-app",			"0-7"},//0-7
+		{ "camera-daemon",		"0-3,6-7"}};//0-7
 
 	if (!strcmp(current->comm, "init")) {
 		for (i = 0; i < ARRAY_SIZE(c_targets); i++) {
 			if (!strcmp(cs->css.cgroup->kn->name, c_targets[i].c_name)) {
 				strcpy(buf, c_targets[i].c_cpus);
-				pr_info("Bandido %s: setting to %s\n", c_targets[i].c_name, buf);
+				pr_info("%s: setting to %s\n", c_targets[i].c_name, buf);
 				break;
 			}
 		}
