@@ -9180,8 +9180,7 @@ static inline void hdd_pm_qos_remove_request(struct hdd_context *hdd_ctx)
 {
 }
 
-static inline void hdd_pm_qos_update_cpu_mask(cpumask_t *mask,
-					      bool high_throughput)
+static inline int hdd_pm_qos_update_cpu_mask(cpumask_t *mask, bool high_throughput)
 {
 }
 
