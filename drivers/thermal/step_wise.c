@@ -139,7 +139,7 @@ static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
 	enum thermal_trend trend;
 	struct thermal_instance *instance;
 	bool throttle = false;
-	int old_target;
+	int old_target = 0;
 
 	if (trip == THERMAL_TRIPS_NONE) {
 		hyst_temp = trip_temp = tz->forced_passive;
