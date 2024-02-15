@@ -56,6 +56,11 @@ module_param_named(xino_auto, ovl_xino_auto_def, bool, 0644);
 MODULE_PARM_DESC(ovl_xino_auto_def,
 		 "Auto enable xino feature");
 
+static bool __read_mostly ovl_override_creds_def = true;
+module_param_named(override_creds, ovl_override_creds_def, bool, 0644);
+MODULE_PARM_DESC(ovl_override_creds_def,
+		 "Use mounter's credentials for accesses");
+
 static void ovl_entry_stack_free(struct ovl_entry *oe)
 {
 	unsigned int i;
@@ -68,6 +73,11 @@ static bool ovl_metacopy_def = IS_ENABLED(CONFIG_OVERLAY_FS_METACOPY);
 module_param_named(metacopy, ovl_metacopy_def, bool, 0644);
 MODULE_PARM_DESC(ovl_metacopy_def,
 		 "Default to on or off for the metadata only copy up feature");
+
+#ifdef CONFIG_KDP_NS
+extern void rkp_set_mnt_flags(struct vfsmount *mnt,int flags);
+extern void rkp_reset_mnt_flags(struct vfsmount *mnt,int flags);
+#endif
 
 static void ovl_dentry_release(struct dentry *dentry)
 {
@@ -368,6 +378,9 @@ static int ovl_show_options(struct seq_file *m, struct dentry *dentry)
 	if (ofs->config.metacopy != ovl_metacopy_def)
 		seq_printf(m, ",metacopy=%s",
 			   ofs->config.metacopy ? "on" : "off");
+	if (ofs->config.override_creds != ovl_override_creds_def)
+		seq_show_option(m, "override_creds",
+				ofs->config.override_creds ? "on" : "off");
 	return 0;
 }
 
@@ -407,6 +420,8 @@ enum {
 	OPT_XINO_AUTO,
 	OPT_METACOPY_ON,
 	OPT_METACOPY_OFF,
+	OPT_OVERRIDE_CREDS_ON,
+	OPT_OVERRIDE_CREDS_OFF,
 	OPT_ERR,
 };
 
@@ -425,6 +440,8 @@ static const match_table_t ovl_tokens = {
 	{OPT_XINO_AUTO,			"xino=auto"},
 	{OPT_METACOPY_ON,		"metacopy=on"},
 	{OPT_METACOPY_OFF,		"metacopy=off"},
+	{OPT_OVERRIDE_CREDS_ON,		"override_creds=on"},
+	{OPT_OVERRIDE_CREDS_OFF,	"override_creds=off"},
 	{OPT_ERR,			NULL}
 };
 
@@ -483,6 +500,7 @@ static int ovl_parse_opt(char *opt, struct ovl_config *config)
 	config->redirect_mode = kstrdup(ovl_redirect_mode_def(), GFP_KERNEL);
 	if (!config->redirect_mode)
 		return -ENOMEM;
+	config->override_creds = ovl_override_creds_def;
 
 	while ((p = ovl_next_opt(&opt)) != NULL) {
 		int token;
@@ -561,6 +579,14 @@ static int ovl_parse_opt(char *opt, struct ovl_config *config)
 
 		case OPT_METACOPY_OFF:
 			config->metacopy = false;
+			break;
+
+		case OPT_OVERRIDE_CREDS_ON:
+			config->override_creds = true;
+			break;
+
+		case OPT_OVERRIDE_CREDS_OFF:
+			config->override_creds = false;
 			break;
 
 		default:
@@ -865,6 +891,14 @@ ovl_posix_acl_xattr_get(const struct xattr_handler *handler,
 }
 
 static int __maybe_unused
+__ovl_posix_acl_xattr_get(const struct xattr_handler *handler,
+			  struct dentry *dentry, struct inode *inode,
+			  const char *name, void *buffer, size_t size)
+{
+	return __ovl_xattr_get(dentry, inode, handler->name, buffer, size);
+}
+
+static int __maybe_unused
 ovl_posix_acl_xattr_set(const struct xattr_handler *handler,
 			struct dentry *dentry, struct inode *inode,
 			const char *name, const void *value,
@@ -944,6 +978,13 @@ static int ovl_other_xattr_get(const struct xattr_handler *handler,
 	return ovl_xattr_get(dentry, inode, name, buffer, size);
 }
 
+static int __ovl_other_xattr_get(const struct xattr_handler *handler,
+				 struct dentry *dentry, struct inode *inode,
+				 const char *name, void *buffer, size_t size)
+{
+	return __ovl_xattr_get(dentry, inode, name, buffer, size);
+}
+
 static int ovl_other_xattr_set(const struct xattr_handler *handler,
 			       struct dentry *dentry, struct inode *inode,
 			       const char *name, const void *value,
@@ -957,6 +998,7 @@ ovl_posix_acl_access_xattr_handler = {
 	.name = XATTR_NAME_POSIX_ACL_ACCESS,
 	.flags = ACL_TYPE_ACCESS,
 	.get = ovl_posix_acl_xattr_get,
+	.__get = __ovl_posix_acl_xattr_get,
 	.set = ovl_posix_acl_xattr_set,
 };
 
@@ -965,6 +1007,7 @@ ovl_posix_acl_default_xattr_handler = {
 	.name = XATTR_NAME_POSIX_ACL_DEFAULT,
 	.flags = ACL_TYPE_DEFAULT,
 	.get = ovl_posix_acl_xattr_get,
+	.__get = __ovl_posix_acl_xattr_get,
 	.set = ovl_posix_acl_xattr_set,
 };
 
@@ -977,6 +1020,7 @@ static const struct xattr_handler ovl_own_xattr_handler = {
 static const struct xattr_handler ovl_other_xattr_handler = {
 	.prefix	= "", /* catch all */
 	.get = ovl_other_xattr_get,
+	.__get = __ovl_other_xattr_get,
 	.set = ovl_other_xattr_set,
 };
 
@@ -1061,7 +1105,11 @@ static int ovl_get_upper(struct super_block *sb, struct ovl_fs *ofs,
 	}
 
 	/* Don't inherit atime flags */
+#ifdef CONFIG_KDP_NS
+	rkp_reset_mnt_flags(upper_mnt, MNT_NOATIME | MNT_NODIRATIME | MNT_RELATIME); 
+#else
 	upper_mnt->mnt_flags &= ~(MNT_NOATIME | MNT_NODIRATIME | MNT_RELATIME);
+#endif
 	ofs->upper_mnt = upper_mnt;
 
 	if (ovl_inuse_trylock(ofs->upper_mnt->mnt_root)) {
@@ -1332,8 +1380,11 @@ static int ovl_get_lower_layers(struct super_block *sb, struct ovl_fs *ofs,
 		 * Make lower layers R/O.  That way fchmod/fchown on lower file
 		 * will fail instead of modifying lower fs.
 		 */
+#ifdef CONFIG_KDP_NS
+		rkp_set_mnt_flags(mnt,MNT_READONLY|MNT_NOATIME);
+#else
 		mnt->mnt_flags |= MNT_READONLY | MNT_NOATIME;
-
+#endif
 		ofs->lower_layers[ofs->numlower].trap = trap;
 		ofs->lower_layers[ofs->numlower].mnt = mnt;
 		ofs->lower_layers[ofs->numlower].idx = i + 1;
@@ -1669,7 +1720,6 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
 		       ovl_dentry_lower(root_dentry), NULL);
 
 	sb->s_root = root_dentry;
-
 	return 0;
 
 out_free_oe:
