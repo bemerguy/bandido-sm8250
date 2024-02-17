@@ -57,7 +57,7 @@ static int sg_version_num = 30536;	/* 2 digits for each component */
 #include <scsi/scsi_dbg.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_driver.h>
-#include <scsi/scsi_ioctl.h>
+#include <uapi/scsi/scsi_ioctl.h>
 #include <scsi/sg.h>
 
 #include "scsi_logging.h"

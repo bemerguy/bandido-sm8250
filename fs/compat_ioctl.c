@@ -69,7 +69,7 @@
 #include <linux/cdrom.h>
 #include <linux/fd.h>
 #include <scsi/scsi.h>
-#include <scsi/scsi_ioctl.h>
+#include <uapi/scsi/scsi_ioctl.h>
 #include <scsi/sg.h>
 #endif
 

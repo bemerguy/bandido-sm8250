@@ -71,7 +71,7 @@
 #include <scsi/scsi_driver.h>
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
-#include <scsi/scsi_ioctl.h>
+#include <uapi/scsi/scsi_ioctl.h>
 #include <scsi/scsicam.h>
 
 #include "sd.h"

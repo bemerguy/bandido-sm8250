@@ -31,7 +31,7 @@
 #include <linux/uaccess.h>
 
 #include <scsi/scsi.h>
-#include <scsi/scsi_ioctl.h>
+#include <uapi/scsi/scsi_ioctl.h>
 #include <scsi/scsi_cmnd.h>
 
 struct blk_cmd_filter {
