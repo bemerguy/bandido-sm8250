@@ -408,7 +408,7 @@ bool write_debug_partition(enum debug_partition_index index, void *value)
 	return false;
 }
 
-static int is_boot_recovery;
+int is_boot_recovery;
 
 static int __init boot_recovery(char *str)
 {

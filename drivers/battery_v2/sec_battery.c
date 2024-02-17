@@ -5413,7 +5413,7 @@ bool sec_bat_check_boost_mfc_condition(struct sec_battery_info *battery, int mod
 		POWER_SUPPLY_EXT_PROP_CHARGE_BOOST, value);
 	boost_status = value.intval;
 
-	boot_recov = is_boot_recovery();
+	boot_recov = is_boot_recovery;
 
 	pr_info("%s wpc_det(%d), mst_pwr_en(%d), boost_status(%d), boot_recov(%d)\n",
 		__func__, wpc_det, mst_pwr_en, boost_status, boot_recov);
@@ -10113,9 +10113,9 @@ static int sec_battery_probe(struct platform_device *pdev)
 		POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX, value);
 
 	/* make fg_reset true again for actual normal booting after recovery kernel is done */
-	if (fg_reset && is_boot_recovery()) {
+	if (fg_reset && is_boot_recovery) {
 		pr_info("%s: fg_reset(%d) boot_recov(%d)\n",
-			__func__, fg_reset, is_boot_recovery());
+			__func__, fg_reset, is_boot_recovery);
 		psy_do_property(battery->pdata->fuelgauge_name, set,
 			POWER_SUPPLY_PROP_ENERGY_NOW, value);
 		pr_info("%s: make fg_reset true again for actual normal booting\n", __func__);

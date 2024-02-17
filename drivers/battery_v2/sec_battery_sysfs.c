@@ -2055,7 +2055,7 @@ ssize_t sec_bat_store_attrs(
 					"%s: skip same siop level: %d\n", __func__, x);
 				return count;
 			} else if (x >= 0 && x <= 100 && battery->pdata->temp_check_type) {
-				if (is_boot_recovery() && battery->capacity <= 5) {
+				if (is_boot_recovery && battery->capacity <= 5) {
 					dev_info(battery->dev,
 						"%s: It is recovery mode, set the siop level as 100 to charge properly\n",
 						__func__);
