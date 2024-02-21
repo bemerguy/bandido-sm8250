@@ -1218,6 +1218,9 @@ static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
 	if (ret != 1)
 		return -EINVAL;
 
+	if (current->parent->pid == 1)
+		return -EINVAL;
+
 	mutex_lock(&df->event_lock);
 	mutex_lock(&df->lock);
 
@@ -1262,6 +1265,9 @@ static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
 
 	ret = sscanf(buf, "%lu", &value);
 	if (ret != 1)
+		return -EINVAL;
+
+	if (current->parent->pid == 1)
 		return -EINVAL;
 
 	mutex_lock(&df->event_lock);
