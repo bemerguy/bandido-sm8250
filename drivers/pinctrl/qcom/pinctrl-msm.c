@@ -45,7 +45,9 @@
 #ifdef CONFIG_SEC_GPIO_DVS
 #include <linux/secgpio_dvs.h>
 #endif /* CONFIG_SEC_GPIO_DVS */
-#endif /* CONFIG_SEC_PM_DEBUG */
+#else /* CONFIG_SEC_PM_DEBUG */
+bool msm_gpio_is_valid(int gpionum);
+#endif
 
 #define MAX_NR_GPIO 300
 #define PS_HOLD_OFFSET 0x820
@@ -93,10 +95,8 @@ struct msm_pinctrl {
 };
 
 static struct msm_pinctrl *msm_pinctrl_data;
-#ifdef CONFIG_SEC_PM_DEBUG
 static int total_pin_count = 0;
 static int msm_gpio_chip_base = 0;
-#endif /* CONFIG_SEC_PM_DEBUG */
 
 static int msm_get_groups_count(struct pinctrl_dev *pctldev)
 {
@@ -658,7 +658,7 @@ int msm_gp_get_value(struct gpio_chip *chip, uint pin_no, int in_out_type)
 
 	return 0;
 }
-
+#endif /* CONFIG_SEC_PM_DEBUG */
 bool msm_gpio_is_valid(int gpionum)
 {
 	if (gpionum < 0 || gpionum >= total_pin_count)
@@ -681,8 +681,6 @@ bool msm_gpio_is_valid(int gpionum)
 
 	return 1;
 }
-#endif /* CONFIG_SEC_PM_DEBUG */
-
 #ifdef CONFIG_DEBUG_FS
 #include <linux/seq_file.h>
 
@@ -1835,9 +1833,7 @@ int msm_pinctrl_probe(struct platform_device *pdev,
 	pctrl->desc.name = dev_name(&pdev->dev);
 	pctrl->desc.pins = pctrl->soc->pins;
 	pctrl->desc.npins = pctrl->soc->npins;
-#ifdef CONFIG_SEC_PM_DEBUG
 	total_pin_count = pctrl->desc.npins;
-#endif /* CONFIG_SEC_PM_DEBUG */
 
 	pctrl->pctrl = devm_pinctrl_register(&pdev->dev, &pctrl->desc, pctrl);
 	if (IS_ERR(pctrl->pctrl)) {
