@@ -1389,7 +1389,7 @@ static int sugov_init(struct cpufreq_policy *policy)
 	tunables->up_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
 	tunables->down_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
 	tunables->hispeed_load = DEFAULT_HISPEED_LOAD;
-	tunables->hispeed_freq = 0;
+	tunables->hispeed_freq = 1248000;
 #ifdef CONFIG_SCHED_FFSI_GLUE
 	tunables->fb_legacy = false;
 	sg_policy->be_stochastic = false;
@@ -1615,7 +1615,7 @@ static void sugov_limits(struct cpufreq_policy *policy)
 }
 
 static struct cpufreq_governor schedutil_gov = {
-	.name			= "schedutil",
+	.name			= "schedinutil",
 	.owner			= THIS_MODULE,
 	.dynamic_switching	= true,
 	.init			= sugov_init,
@@ -1624,14 +1624,14 @@ static struct cpufreq_governor schedutil_gov = {
 	.stop			= sugov_stop,
 	.limits			= sugov_limits,
 };
-
+/* no you're not
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL
 struct cpufreq_governor *cpufreq_default_governor(void)
 {
 	return &schedutil_gov;
 }
 #endif
-
+*/
 static int __init sugov_register(void)
 {
 	return cpufreq_register_governor(&schedutil_gov);
