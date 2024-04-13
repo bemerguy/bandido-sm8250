@@ -97,6 +97,8 @@ const char *cam_get_module_name(unsigned int module_id);
 #define CAM_WARN(__module, fmt, args...)                           \
 	pr_info("CAM_WARN: %s: %s: %d " fmt "\n",                  \
 		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+#undef CAM_WARN
+#define CAM_WARN(__module, fmt, args...) do {} while (0)
 /*
  * CAM_INFO
  * @brief    :  This Macro will print Information logs
@@ -108,6 +110,8 @@ const char *cam_get_module_name(unsigned int module_id);
 #define CAM_INFO(__module, fmt, args...)                           \
 	pr_info("CAM_INFO: %s: %s: %d " fmt "\n",                     \
 		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+#undef CAM_INFO
+#define CAM_INFO(__module, fmt, args...) do {} while (0)
 
 /*
  * CAM_INFO_RATE_LIMIT
