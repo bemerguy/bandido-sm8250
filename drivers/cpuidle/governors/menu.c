@@ -279,8 +279,10 @@ again:
  * menu_select - selects the next idle state to enter
  * @drv: cpuidle driver containing state data
  * @dev: the CPU
+ * @stop_tick: indication on whether or not to stop the tick
  */
-static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
+static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev,
+		       bool *stop_tick)
 {
 	struct menu_device *data = this_cpu_ptr(&menu_devices);
 	int latency_req = cpuidle_governor_latency_req(dev->cpu);
@@ -295,6 +297,12 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	if (data->needs_update) {
 		menu_update(drv, dev);
 		data->needs_update = 0;
+	}
+
+	/* Special case when user has set very strict latency requirement */
+	if (unlikely(latency_req == 0)) {
+		*stop_tick = false;
+		return 0;
 	}
 
 	/* determine the expected residency time, round up */
@@ -421,6 +429,8 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	if (((drv->states[idx].flags & CPUIDLE_FLAG_POLLING) ||
 	     expected_interval < TICK_USEC) && !tick_nohz_tick_stopped()) {
 		unsigned int delta_next_us = ktime_to_us(delta_next);
+
+		*stop_tick = false;
 
 		if (idx > 0 && drv->states[idx].target_residency > delta_next_us) {
 			/*
