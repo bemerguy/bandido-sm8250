@@ -29,6 +29,8 @@ __asm__(".arch_extension	lse");
 #endif	/* __ASSEMBLER__ */
 #else	/* CONFIG_AS_LSE && CONFIG_ARM64_LSE_ATOMICS */
 
+#define ARM64_LSE_ATOMIC_INSN(lse) lse
+
 #ifndef __ASSEMBLER__
 
 #define __LL_SC_INLINE		static inline
