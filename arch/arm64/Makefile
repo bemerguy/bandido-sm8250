@@ -60,14 +60,14 @@ KBUILD_CFLAGS	+= -mgeneral-regs-only $(lseinstr) $(brokengasinst)
 
 ifeq ($(CONFIG_ARCH_KONA), y)
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -mcpu=cortex-a55
-KBUILD_AFLAGS   += -mcpu=cortex-a55
+KBUILD_CFLAGS   += -mcpu=cortex-a55+crypto+crc+dotprod+rcpc
+KBUILD_AFLAGS   += -mcpu=cortex-a55+crypto+crc+dotprod+rcpc
 ifeq ($(CONFIG_LD_IS_LLD), y)
 KBUILD_LDFLAGS  += -mllvm -mcpu=cortex-a55
 endif
 else
-KBUILD_CFLAGS   += -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
-KBUILD_AFLAGS   += -mcpu=cortex-a76.cortex-a55 -mtune=cortex-a76.cortex-a55
+KBUILD_CFLAGS   += -mcpu=cortex-a76.cortex-a55+crc+crypto+lse+rcpc+dotprod+aes+sha2+simd+fp
+KBUILD_LDFLAGS  += -mcpu=cortex-a76.cortex-a55+crc+crypto+lse+rcpc+dotprod+aes+sha2+simd+fp
 endif
 endif
 
