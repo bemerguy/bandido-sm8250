@@ -987,7 +987,7 @@ retry:
 		if (err) {
 			clear_cold_data(page);
 			if (err == -ENOMEM) {
-				congestion_wait(BLK_RW_ASYNC, HZ/50);
+				congestion_wait(BLK_RW_ASYNC, HZ/200);
 				goto retry;
 			}
 			if (is_dirty)
