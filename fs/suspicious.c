@@ -20,8 +20,8 @@ static const char* const suspicious_paths[] = {
 	"/dev/zygisk",
 	"/system/addon.d",
 	"/vendor/bin/install-recovery.sh",
-	"/system/bin/install-recovery.sh",
-	"/debug_ramdisk"
+	"/system/bin/install-recovery.sh"
+//	"/debug_ramdisk"
 };
 
 static const char* const suspicious_mount_types[] = {
