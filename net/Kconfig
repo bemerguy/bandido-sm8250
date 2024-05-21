@@ -256,18 +256,18 @@ source "net/ncm/Kconfig"
 config RPS
 	bool
 	depends on SMP && SYSFS
-	default y
+	default n
 
 config RFS_ACCEL
 	bool
 	depends on RPS
 	select CPU_RMAP
-	default y
+	default n
 
 config XPS
 	bool
 	depends on SMP
-	default y
+	default n
 
 config HWBM
        bool
