@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
+subdir-ccflags-y += $(BOPTS)
+
 ccflags-y += -I$(srctree)/techpack/video/msm/vidc/ \
     -I$(srctree)/drivers/devfreq/
 
