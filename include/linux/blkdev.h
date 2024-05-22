@@ -49,7 +49,7 @@ struct keyslot_manager;
 #ifdef CONFIG_LARGE_DIRTY_BUFFER
 #define BLKDEV_MAX_RQ	256
 #else
-#define BLKDEV_MAX_RQ  512     /* Default maximum */
+#define BLKDEV_MAX_RQ  128     /* Default maximum */
 #endif
 
 /* Must be consistent with blk_mq_poll_stats_bkt() */
@@ -832,7 +832,7 @@ bool blk_queue_flag_test_and_clear(unsigned int flag, struct request_queue *q);
 //#define blk_queue_io_stat(q)	test_bit(QUEUE_FLAG_IO_STAT, &(q)->queue_flags)
 #define blk_queue_io_stat(q)	false
 //#define blk_queue_add_random(q)	test_bit(QUEUE_FLAG_ADD_RANDOM, &(q)->queue_flags)
-#define blk_queue_add_random(q)	true
+#define blk_queue_add_random(q)	false
 #define blk_queue_discard(q)	test_bit(QUEUE_FLAG_DISCARD, &(q)->queue_flags)
 #define blk_queue_secure_erase(q) \
 	(test_bit(QUEUE_FLAG_SECERASE, &(q)->queue_flags))
@@ -1428,7 +1428,7 @@ struct blk_plug {
 	struct list_head mq_list; /* blk-mq requests */
 	struct list_head cb_list; /* md requires an unplug callback */
 };
-#define BLK_MAX_REQUEST_COUNT 16
+#define BLK_MAX_REQUEST_COUNT 32
 #define BLK_PLUG_FLUSH_SIZE (128 * 1024)
 
 struct blk_plug_cb;
