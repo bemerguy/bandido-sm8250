@@ -142,6 +142,16 @@ static int __init permissive_selinux(char *str)
 }
 __setup("androidboot.selinux=", permissive_selinux);
 
+bool aosp;
+static int __init aosp_rom(char *str)
+{
+        if (!strncmp(str, "true", 4))
+                aosp = true;
+
+        return 0;
+}
+__setup("aosp=", aosp_rom);
+
 #ifdef CONFIG_SECURITY_SELINUX_DEVELOP
 static ssize_t sel_write_enforce(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
