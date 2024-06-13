@@ -45,9 +45,7 @@
 #ifdef CONFIG_SEC_GPIO_DVS
 #include <linux/secgpio_dvs.h>
 #endif /* CONFIG_SEC_GPIO_DVS */
-#else /* CONFIG_SEC_PM_DEBUG */
-bool msm_gpio_is_valid(int gpionum);
-#endif
+#endif /* CONFIG_SEC_PM_DEBUG */
 
 #define MAX_NR_GPIO 300
 #define PS_HOLD_OFFSET 0x820
@@ -95,8 +93,10 @@ struct msm_pinctrl {
 };
 
 static struct msm_pinctrl *msm_pinctrl_data;
+#ifdef CONFIG_SEC_PM_DEBUG
 static int total_pin_count = 0;
 static int msm_gpio_chip_base = 0;
+#endif /* CONFIG_SEC_PM_DEBUG */
 
 static int msm_get_groups_count(struct pinctrl_dev *pctldev)
 {
@@ -658,7 +658,7 @@ int msm_gp_get_value(struct gpio_chip *chip, uint pin_no, int in_out_type)
 
 	return 0;
 }
-#endif /* CONFIG_SEC_PM_DEBUG */
+
 bool msm_gpio_is_valid(int gpionum)
 {
 	if (gpionum < 0 || gpionum >= total_pin_count)
@@ -679,6 +679,8 @@ bool msm_gpio_is_valid(int gpionum)
 
 	return 1;
 }
+#endif /* CONFIG_SEC_PM_DEBUG */
+
 #ifdef CONFIG_DEBUG_FS
 #include <linux/seq_file.h>
 
@@ -810,11 +812,11 @@ static void msm_gpio_update_dual_edge_pos(struct msm_pinctrl *pctrl,
 	unsigned pol;
 
 	do {
-		val = readl(pctrl->regs + g->io_reg) & BIT(g->in_bit);
+		val = readl_relaxed(pctrl->regs + g->io_reg) & BIT(g->in_bit);
 
 		pol = readl_relaxed(pctrl->regs + g->intr_cfg_reg);
 		pol ^= BIT(g->intr_polarity_bit);
-		writel(pol, pctrl->regs + g->intr_cfg_reg);
+		writel_relaxed(pol, pctrl->regs + g->intr_cfg_reg);
 
 		val2 = readl_relaxed(pctrl->regs + g->io_reg) & BIT(g->in_bit);
 		intstat = readl_relaxed(pctrl->regs + g->intr_status_reg);
@@ -914,7 +916,7 @@ static void _msm_gpio_irq_unmask(struct irq_data *d, bool status_clear)
 	val = readl_relaxed(pctrl->regs + g->intr_cfg_reg);
 	val |= BIT(g->intr_raw_status_bit);
 	val |= BIT(g->intr_enable_bit);
-	writel(val, pctrl->regs + g->intr_cfg_reg);
+	writel_relaxed(val, pctrl->regs + g->intr_cfg_reg);
 
 	set_bit(d->hwirq, pctrl->enabled_irqs);
 
@@ -1280,7 +1282,7 @@ static int msm_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 	} else {
 		BUG();
 	}
-	writel(val, pctrl->regs + g->intr_cfg_reg);
+	writel_relaxed(val, pctrl->regs + g->intr_cfg_reg);
 
 	if (test_bit(d->hwirq, pctrl->dual_edge_irqs))
 		msm_gpio_update_dual_edge_pos(pctrl, g, d);
@@ -1447,7 +1449,7 @@ static int msm_gpio_domain_alloc(struct irq_domain *domain, unsigned int virq,
 				 unsigned int nr_irqs, void *arg)
 {
 	int ret;
-	irq_hw_number_t hwirq = 0;
+	irq_hw_number_t hwirq;
 	struct gpio_chip *gc = domain->host_data;
 	struct msm_pinctrl *pctrl = gpiochip_get_data(gc);
 	struct irq_fwspec *fwspec = arg;
@@ -1831,7 +1833,9 @@ int msm_pinctrl_probe(struct platform_device *pdev,
 	pctrl->desc.name = dev_name(&pdev->dev);
 	pctrl->desc.pins = pctrl->soc->pins;
 	pctrl->desc.npins = pctrl->soc->npins;
+#ifdef CONFIG_SEC_PM_DEBUG
 	total_pin_count = pctrl->desc.npins;
+#endif /* CONFIG_SEC_PM_DEBUG */
 
 	pctrl->pctrl = devm_pinctrl_register(&pdev->dev, &pctrl->desc, pctrl);
 	if (IS_ERR(pctrl->pctrl)) {
