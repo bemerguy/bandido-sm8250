@@ -358,14 +358,10 @@ HOST_LFS_CFLAGS := $(shell getconf LFS_CFLAGS 2>/dev/null)
 HOST_LFS_LDFLAGS := $(shell getconf LFS_LDFLAGS 2>/dev/null)
 HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 
-ifneq ($(LLVM),)
-HOSTCC	= $(CLANG_DIR)clang
-HOSTCXX	= $(CLANG_DIR)clang++
-else
-HOSTCC	= gcc
-HOSTCXX	= g++
-endif
-KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 \
+HOSTCC	= ccache gcc
+HOSTCXX	= ccache g++
+
+KBUILD_HOSTCFLAGS   := -Wmissing-prototypes -Wstrict-prototypes -O2 \
 		-fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS) \
 		$(HOSTCFLAGS)
 KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS)
@@ -373,12 +369,12 @@ KBUILD_HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS) $(HOSTLDFLAGS)
 KBUILD_HOSTLDLIBS   := $(HOST_LFS_LIBS) $(HOSTLDLIBS)
 
 # Make variables (CC, etc...)
-AS		= $(CROSS_COMPILE)as
 LD		= $(CROSS_COMPILE)ld
 CC		= $(CROSS_COMPILE)gcc
+AS		= $(CROSS_COMPILE)as
 CPP		= $(CC) -E
 ifneq ($(LLVM),)
-CC		= $(CLANG_DIR)clang
+CC		= ccache $(CLANG_DIR)clang
 LD		= $(CLANG_DIR)ld.lld
 AR		= $(CLANG_DIR)llvm-ar
 NM		= $(CLANG_DIR)llvm-nm
@@ -386,7 +382,7 @@ OBJCOPY		= $(CLANG_DIR)llvm-objcopy
 OBJDUMP		= $(CLANG_DIR)llvm-objdump
 STRIP		= $(CLANG_DIR)llvm-strip
 else
-CC		= $(CROSS_COMPILE)gcc
+CC		= ccache $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)ld
 AR             ?= $(CROSS_COMPILE)ar
 NM             ?= $(CROSS_COMPILE)nm
@@ -434,7 +430,7 @@ LINUXINCLUDE    := \
 		$(USERINCLUDE)
 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_CFLAGS   := -Wall -Wundef -Wno-trigraphs \
+KBUILD_CFLAGS   := -Wundef -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
@@ -461,7 +457,7 @@ export CFLAGS_KASAN CFLAGS_KASAN_NOSANITIZE CFLAGS_UBSAN
 export KBUILD_AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 export KBUILD_AFLAGS_MODULE KBUILD_CFLAGS_MODULE KBUILD_LDFLAGS_MODULE
 export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
-export KBUILD_ARFLAGS
+export KBUILD_ARFLAGS BOPTS BOPTS2
 
 # When compiling out-of-tree modules, put MODVERDIR in the module
 # tree rather than in the kernel tree. The kernel tree might
@@ -623,6 +619,9 @@ endif
 # Defaults to vmlinux, but the arch makefile usually adds further targets
 all: vmlinux
 
+CFLAGS_PGO_CLANG := -fprofile-generate
+export CFLAGS_PGO_CLANG
+
 CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage \
 	$(call cc-option,-fno-tree-loop-im) \
 	$(call cc-disable-warning,maybe-uninitialized,)
@@ -645,9 +644,8 @@ export LLVM_AR LLVM_NM
 endif
 
 ifdef CONFIG_LTO_GCC
-LTO_CFLAGS	:= -flto -flto=jobserver -fipa-pta -fno-fat-lto-objects \
-		   -fuse-linker-plugin -fwhole-program
-KBUILD_CFLAGS	+= $(LTO_CFLAGS) --param=max-inline-insns-auto=1000
+LTO_CFLAGS	:= -flto=auto -fipa-pta
+KBUILD_CFLAGS	+= $(LTO_CFLAGS)
 LTO_LDFLAGS	:= $(LTO_CFLAGS) -Wno-lto-type-mismatch -Wno-psabi \
 		   -Wno-stringop-overflow -flinker-output=nolto-rel
 LDFINAL		:= $(CONFIG_SHELL) $(srctree)/scripts/gcc-ld $(LTO_LDFLAGS)
@@ -703,11 +701,13 @@ include/config/auto.conf:
 endif # may-sync-config
 endif # $(dot-config)
 
-KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-function)
+#KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, array-bounds)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, aggressive-loop-optimizations)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, frame-address,)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, format-truncation)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, format-truncation)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
@@ -716,26 +716,163 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, psabi)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, restrict)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, sequence-point)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, sizeof-pointer-memaccess)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-result)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-value)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overread)
-KBUILD_CFLAGS	+= $(call cc-disable-warning, array-compare)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overread)
+#KBUILD_CFLAGS	+= $(call cc-disable-warning, array-compare)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-variable)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
+endif
+endif
+
+ifdef CONFIG_GCOV_KERNEL
+KBUILD_CFLAGS   += -O1
 else
-KBUILD_CFLAGS   += -O2
+ifeq ($(cc-name),gcc) ######### GCC
+OFLAGS		= -O2 -ffast-math -fsingle-precision-constant -fira-hoist-pressure -fgcse-after-reload\
+		-fgcse-las -fgcse-sm -fmodulo-sched -fmodulo-sched-allow-regmoves -funroll-loops\
+		-fipa-pta -ftree-lrs -freorder-blocks-algorithm=stc -fira-loop-pressure\
+		-floop-interchange -ftree-loop-linear -floop-strip-mine -floop-block\
+		-floop-nest-optimize -fira-hoist-pressure -mlow-precision-div -mlow-precision-sqrt\
+		-falign-functions=16 -falign-jumps=16 -falign-labels=16 -falign-loops=16 \
+		-fgraphite -fgraphite-identity
+
+BOPTS		= --param=inline-min-speedup=10 --param=large-stack-frame-growth=1000\
+                --param=large-function-growth=500
+# -Ofast -fgraphite -fgraphite-identity -fsched-spec-load -fselective-scheduling2
+
+# -fsel-sched-pipelining
+
+BOPTS2 = $(BOPTS)
+
+GCCPARAMS += --param dse-max-alias-queries-per-store=256000 # 256
+GCCPARAMS += --param dse-max-object-size=256000 # 256
+GCCPARAMS += --param graphite-max-arrays-per-scop=100000 # 1000
+GCCPARAMS += --param graphite-max-nb-scop-params=10000 # 20
+GCCPARAMS += --param ira-max-conflict-table-size=32000 # 1000
+GCCPARAMS += --param ira-max-loops-num=10000 # 100
+GCCPARAMS += --param iv-consider-all-candidates-bound=40000 # 100
+GCCPARAMS += --param iv-max-considered-uses=25000 # 1000
+GCCPARAMS += --param loop-invariant-max-bbs-in-loop=500000 # 100
+GCCPARAMS += --param loop-max-datarefs-for-datadeps=100000 # 250
+GCCPARAMS += --param lra-max-considered-reload-pseudos=500000 # 200
+GCCPARAMS += --param max-crossjump-edges=100000 # 50
+GCCPARAMS += --param max-cse-insns=125000 # 500
+GCCPARAMS += --param max-cselib-memory-locations=500000 # 50000
+GCCPARAMS += --param max-delay-slot-insn-search=500000 # 100
+GCCPARAMS += --param max-delay-slot-live-search=500000 # 32
+GCCPARAMS += --param max-dse-active-local-stores=500000 # 32
+GCCPARAMS += --param max-iterations-computation-cost=500000 # 10000
+GCCPARAMS += --param max-iterations-to-track=500000 # 4096
+GCCPARAMS += --param max-last-value-rtl=12500 # 1000
+GCCPARAMS += --param max-modulo-backtrack-attempts=125000 # 2
+GCCPARAMS += --param max-pending-list-length=125000 # 32
+GCCPARAMS += --param max-pipeline-region-blocks=6250 # 100
+GCCPARAMS += --param max-pipeline-region-insns=6250 # 1000
+GCCPARAMS += --param max-reload-search-insns=125000 # 1000
+GCCPARAMS += --param max-sched-extend-regions-iters=5 # 2
+GCCPARAMS += --param max-sched-ready-insns=65536 # 100
+
+GCCPARAMS += --param max-sched-region-blocks=40 # 10. 50 is TOO MUCH RAM
+GCCPARAMS += --param max-sched-region-insns=100000 # 100
+#GCCPARAMS += --param max-slsr-cand-scan=999999 # 50
+GCCPARAMS += --param max-ssa-name-query-depth=10 # 3
+#GCCPARAMS += --param max-stores-to-merge=65536 #64
+
+GCCPARAMS += --param max-tail-merge-comparisons=125000 # 1000
+GCCPARAMS += --param max-tail-merge-iterations=125000 # 2
+GCCPARAMS += --param max-tree-if-conversion-phi-args=8192 # 4
+GCCPARAMS += --param max-vartrack-size=0 # 1000000
+GCCPARAMS += --param sccvn-max-alias-queries-per-access=125000 # 8
+GCCPARAMS += --param scev-max-expr-complexity=500000 # 196
+GCCPARAMS += --param scev-max-expr-size=500000 # 196
+GCCPARAMS += --param selsched-insns-to-rename=250 # 250
+GCCPARAMS += --param selsched-max-lookahead=12500 # 40
+GCCPARAMS += --param selsched-max-sched-times=1250 # 100
+
+GCCPARAMS1 += --param=l1-cache-line-size=64
+GCCPARAMS1 += --param=l1-cache-size=64
+GCCPARAMS1 += --param=l2-cache-size=4096
+
+GCCPARAMS += --param=early-inlining-insns=6 #10 compiling, 6 for Os
+GCCPARAMS += --param=large-function-growth=100 #100%. % to grow large functions? compiling. matters too much
+GCCPARAMS += --param=large-stack-frame-growth=500 #1000% compiling
+GCCPARAMS += --param=large-function-insns=130 #what is a large function? 2700. n muda mt?
+GCCPARAMS += --param=max-inline-insns-small=12 #insns to be considered small thus automatically inlining
+GCCPARAMS += --param=max-inline-insns-size=6 #max insns to inline when optimized for size
+#GCCPARAMS += --param=max-inline-insns-auto=15 #15 Os, 30 Ofast. max insns to even consider. 15 == crash
+GCCPARAMS += --param=max-inline-insns-single=200 #70 Os, 200 Ofast. but when the code explicity says to inline
+GCCPARAMS += --param=inline-min-speedup=30 #30% Os, 15% Ofast. ignore above if this % of speedup is calculated
+
+GCCPARAMS += --param=inline-unit-growth=400 #40%. huge difference. % to grow a large unit
+GCCPARAMS += --param=ipa-cp-unit-growth=50 #10%
+
+GCCPARAMS += --param=min-crossjump-insns=20 #1 Os, 5 Ofast
+GCCPARAMS += --param=inline-heuristics-hint-percent=200 #200% Os, 600% OFast. when VERY profitable
+KBUILD_CFLAGS	+= -O2 $(OFLAGS2) $(GCCPARAMS1) -fopt-info-all=dump.compiling
+
+ifdef CONFIG_LTO_GCC
+LDFINAL	+= $(filter-out -Os,$(OFLAGS2)) $(GCCPARAMS1) --param=max-inline-recursive-depth-auto=64\
+		--param=ipa-cp-unit-growth=100 -fopt-info-all=dump.linking
+endif
+else
+ifeq ($(cc-name),clang) ######### CLANG
+OFLAGS         = -Os -ffast-math
+BOPTS           = -O2
+BOPTS2          = -Ofast
+KBUILD_CFLAGS   += $(OFLAGS)
+
 ifeq ($(CONFIG_LTO_CLANG),y)
 ifeq ($(CONFIG_LD_IS_LLD), y)
-LDFLAGS += --lto-O2
+KBUILD_LDFLAGS += --lto-O3
 endif
+endif
+
+# Enable Clang Polly optimizations
+POLLY           += -mllvm -polly \
+                   -mllvm -polly-run-dce \
+                   -mllvm -polly-run-inliner \
+                   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs \
+                   -mllvm -polly-ast-use-context \
+                   -mllvm -polly-detect-keep-going \
+                   -mllvm -polly-vectorizer=stripmine \
+                   -mllvm -polly-invariant-load-hoisting
+KBUILD_CFLAGS   += $(POLLY)
+KBUILD_LDFLAGS  += $(POLLY)
+ifeq ($(CONFIG_PGOUSE_CLANG), y)
+KBUILD_CFLAGS   += -fprofile-use=vmlinux.profdata
+KBUILD_LDFLAGS  += --lto-cs-profile-file=vmlinux.profdata
+LLVMPARAMS      += -mllvm -import-critical-multiplier=2 #100
+LLVMPARAMS      += -mllvm -import-hot-multiplier=1 #10
+LLVMPARAMS      += -mllvm -import-cold-multiplier=0 #0
+LLVMPARAMS      += -mllvm -import-instr-evolution-factor=0.7 #0.7
+LLVMPARAMS      += -mllvm -inlinecold-threshold=5 #45 "cold attribute" PGO-specific noneedrebuild
+LLVMPARAMS      += -mllvm -hot-callsite-threshold=800 #3000 PGO-specific noneedrebuild
+endif
+LLVMPARAMS      += -mllvm -import-instr-limit=40 #100 de outras unidades
+
+LLVMPARAMS      += -mllvm -inline-threshold=120 #225 tava 125 ha tempos noneedrebuild
+LLVMPARAMS      += -mllvm -inlinehint-threshold=325 #325 ja foi 10000 sem mudar mt noneedrebuild
+LLVMPARAMS      += -mllvm -inline-instr-cost=13 #5 PGO e LTO influencia mt.
+LLVMPARAMS      += -mllvm -inline-cold-callsite-threshold=5 #45 //qnd n tem pgo noneedrebuild
+LLVMPARAMS      += -mllvm -locally-hot-callsite-threshold=400 #525 NOT PGO-specific noneedrebuild
+
+LLVMPARAMS      += -mllvm -inline-size-allowance=10 #100
+LLVMPARAMS      += -mllvm -inline-enable-cost-benefit-analysis=true #false
+LLVMPARAMS      += -mllvm -print-instruction-comments=true
+LLVMPARAMS      += -mllvm -hot-cold-split=true
+KBUILD_CFLAGS   += $(LLVMPARAMS)
+KBUILD_LDFLAGS  += $(LLVMPARAMS)
+else ######### not gcc nor clang
+KBUILD_CFLAGS += -O2
 endif
 endif
 endif
@@ -780,7 +917,6 @@ ifeq ($(CONFIG_LD_IS_LLD), y)
 KBUILD_CFLAGS += -fuse-ld=lld
 endif
 KBUILD_CFLAGS += -meabi gnu
-ifeq ($(cc-name),clang)
 KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
 KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
 KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
@@ -799,20 +935,16 @@ KBUILD_CFLAGS += $(call cc-disable-warning, tautological-compare)
 # See modpost pattern 2
 KBUILD_CFLAGS += $(call cc-option, -mno-global-merge,)
 KBUILD_CFLAGS += $(call cc-option, -fcatch-undefined-behavior)
-endif
-
-else
 
 # clang's -Wpointer-to-int-cast warns when casting to enums, which does not match GCC.
 # Disable that part of the warning because it is very noisy across the kernel and does
 # not point out any real bugs.
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-to-enum-cast)
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-to-int-cast)
-
+endif
 # These warnings generated too much noise in a regular build.
 # Use make W=1 to enable them (see scripts/Makefile.extrawarn)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
-endif
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
 ifdef CONFIG_FRAME_POINTER
@@ -825,6 +957,9 @@ else
 # -fomit-frame-pointer with FUNCTION_TRACER.
 ifndef CONFIG_FUNCTION_TRACER
 KBUILD_CFLAGS	+= -fomit-frame-pointer
+ifdef CONFIG_LTO_GCC
+LDFINAL	+= -fomit-frame-pointer
+endif
 endif
 endif
 
@@ -919,18 +1054,12 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
-lto-clang-flags	:= -flto=thin
+lto-clang-flags	:= -flto=thin -fno-split-lto-unit -funified-lto
 KBUILD_LDFLAGS	+= --thinlto-cache-dir=.thinlto-cache
 else
 lto-clang-flags	:= -flto
 endif
-lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
-
-# Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
-
-KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
-KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
+lto-clang-flags += -fvisibility=default
 
 KBUILD_LDFLAGS_MODULE += -T $(srctree)/scripts/module-lto.lds
 
@@ -984,7 +1113,7 @@ endif
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 
 # warn about C99 declaration after statement
-KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
+#KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
@@ -1053,28 +1182,6 @@ CHECKFLAGS += $(if $(CONFIG_CPU_BIG_ENDIAN),-mbig-endian,-mlittle-endian)
 
 # the checker needs the correct machine size
 CHECKFLAGS += $(if $(CONFIG_64BIT),-m64,-m32)
-
-USE_SECGETSPF := $(shell echo $(PATH))
-ifneq ($(findstring buildscript/build_common/core/bin, $(USE_SECGETSPF)),)
-  ifneq ($(shell secgetspf SEC_PRODUCT_FEATURE_BIOAUTH_CONFIG_FINGERPRINT_TZ), false)
-    ifeq ($(CONFIG_SENSORS_FINGERPRINT), y)
-      ifneq ($(SEC_FACTORY_BUILD), true)
-        export KBUILD_FP_SENSOR_CFLAGS := -DENABLE_SENSORS_FPRINT_SECURE
-      endif
-    endif
-  endif
-else
-  ifeq ($(CONFIG_SENSORS_FINGERPRINT), y)
-    ifneq ($(SEC_FACTORY_BUILD), true)
-      export KBUILD_FP_SENSOR_CFLAGS := -DENABLE_SENSORS_FPRINT_SECURE
-    endif
-  endif
-endif
-ifneq ($(shell secgetspf SEC_PRODUCT_FEATURE_COMMON_CONFIG_SEP_VERSION),)
-      SEP_MAJOR_VERSION := $(shell secgetspf SEC_PRODUCT_FEATURE_COMMON_CONFIG_SEP_VERSION | cut -f1 -d.)
-      SEP_MINOR_VERSION := $(shell secgetspf SEC_PRODUCT_FEATURE_COMMON_CONFIG_SEP_VERSION | cut -f2 -d.)
-      export KBUILD_SEP_VERSION := -DSEP_KVERSION=$(SEP_MAJOR_VERSION)$(SEP_MINOR_VERSION)
-endif
 
 # Default kernel image to build when no specific target is given.
 # KBUILD_IMAGE may be overruled on the command line or
