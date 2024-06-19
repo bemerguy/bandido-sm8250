@@ -2762,15 +2762,13 @@ static void _set_preferred_cluster(struct related_thread_group *grp)
 			continue;
 
 		combined_demand += p->ravg.coloc_demand;
-		if (!trace_sched_set_preferred_cluster_enabled()) {
-			if (combined_demand > sched_group_upmigrate)
-				break;
-		}
+
+		if (combined_demand > sched_group_upmigrate)
+			break;
 	}
 
 	grp->last_update = wallclock;
 	update_best_cluster(grp, combined_demand, group_boost);
-	trace_sched_set_preferred_cluster(grp, combined_demand);
 out:
 	if (grp->id == DEFAULT_CGROUP_COLOC_ID
 	    && grp->skip_min != prev_skip_min) {
@@ -3298,8 +3296,6 @@ static void transfer_busy_time(struct rq *rq, struct related_thread_group *grp,
 	 */
 	p->ravg.curr_window_cpu[cpu] = p->ravg.curr_window;
 	p->ravg.prev_window_cpu[cpu] = p->ravg.prev_window;
-
-	trace_sched_migration_update_sum(p, migrate_type, rq);
 }
 
 bool is_rtgb_active(void)
